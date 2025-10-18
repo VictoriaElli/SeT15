@@ -1,2 +1,2 @@
 # SeT15
-Gruppeprosjekt i Software Engineering og Testing kurset ved Hiof, Høste 2025. 
+Gruppeprosjekt i Software Engineering og Testing kurset ved Hiof, Høsten 2025. 
