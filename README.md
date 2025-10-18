@@ -1,5 +1,5 @@
 # SeT15
-Gruppeprosjekt i Software Engineering og Testing kurset ved Hiof, Høste 2025. 
+Gruppeprosjekt i Software Engineering og Testing kurset ved Hiof, Høsten 2025. 
 # Software-15
 
 ## Project scope
@@ -21,12 +21,3 @@ This branch is to be always in a runnable state, and contains essentially nightl
 All feature branches are to be made under develop, and can contain incomplete and non-functional code.
 
 ## Project hierarchy
-
-
-### /code
-
-Here are all code-specific files that are not compiled
-
-### /code/java
-
-This is a project folder for Java using Maven 
