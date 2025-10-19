@@ -65,6 +65,11 @@ class ExceptionEntry {
   - type : ExceptionType
   - isActive : boolean
   - operationMessage : OperationMessage
+
+  + validate() : void
+  + appliesTo() : boolean
+  + affectsStop() : boolean
+  + isCancelled() : boolean
 }
 
 ' ========= Frequency =========
@@ -78,6 +83,10 @@ class Frequency {
   - intervalMinutes : int
 
   + setIntervalMinutes(intervalMinutes : int) : void
+  + getDepartureTimes(): List<LocalTime>
+  + isWithinTimeRange(LocalTime time): boolean
+  + conflictsWith(Frequency other): boolean
+  + totalOperationTime(): Duration
 }
 
 ' ========= Season =========
@@ -89,6 +98,9 @@ class Season {
   - endDate : LocalDate
 
   + validateDatesMatchYear() : void
+  + isActiveOn() : boolean
+  + overlapsWith(Season other) : boolean
+  + getIdentifier() : String
 }
 
 ' ========= Enums =========
@@ -100,6 +112,8 @@ enum Weekday {
   FRIDAY
   SATURDAY
   SUNDAY
+
+  + static Weekday fromLocalDate(LocalDate date)
 }
 
 enum ExceptionType {

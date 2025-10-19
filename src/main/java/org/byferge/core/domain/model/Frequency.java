@@ -1,7 +1,7 @@
 package org.byferge.core.domain.model;
 
-import org.byferge.core.domain.Route;
-import org.byferge.core.domain.Weekday;
+import org.byferge.core.domain.model.Route;
+import org.byferge.core.domain.model.Weekday;
 
 import java.time.Duration;
 import java.time.LocalTime;
