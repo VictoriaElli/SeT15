@@ -1,7 +1,5 @@
 package org.byferge.core.domain.model;
 
-import org.byferge.core.domain.model.Route;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;

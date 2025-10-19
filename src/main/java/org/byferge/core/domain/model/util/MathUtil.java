@@ -1,4 +1,4 @@
-package org.byferge.core.util;
+package org.byferge.core.domain.model.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

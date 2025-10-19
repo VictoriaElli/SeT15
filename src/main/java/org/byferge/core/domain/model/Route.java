@@ -1,6 +1,6 @@
 package org.byferge.core.domain.model;
 
-import org.byferge.core.util.MathUtil;
+import org.byferge.core.domain.model.util.MathUtil;
 
 import java.util.ArrayList;
 import java.util.List;

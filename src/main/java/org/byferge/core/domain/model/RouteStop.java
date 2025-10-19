@@ -1,8 +1,6 @@
 package org.byferge.core.domain.model;
 
-import org.byferge.core.domain.model.Route;
-import org.byferge.core.domain.model.Stop;
-import org.byferge.core.util.MathUtil;
+import org.byferge.core.domain.model.util.MathUtil;
 
 // representerer en stopp i en rute, inneholder info om rekkefølge, tid fra start og avstand fra forrige stopp.
 public class RouteStop {
