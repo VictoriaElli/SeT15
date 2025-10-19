@@ -1,6 +1,6 @@
 package org.byferge.core.domain.model;
 
-import org.byferge.core.util.MathUtil;
+import org.byferge.core.domain.model.util.MathUtil;
 
 // representerer et stoppested i rutesystemet, med navnm koordinater og status.
 public class Stop {
