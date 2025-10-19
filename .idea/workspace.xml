@@ -5,11 +5,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3bf5ddd6-a7ff-4926-bfd3-f27ac0098203" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/byferge/core/domain/model/environment/Functions.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/byferge/core/domain/model/environment/Route.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/byferge/core/domain/model/environment/Routes.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/byferge/core/domain/model/environment/Variables.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/application/div.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/ExceptionEntry.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/ExceptionType.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/Frequency.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/OperationMessage.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/Route.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/RouteStop.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/Season.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/Stop.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/Weekday$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/Weekday.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/div2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/environment/EnvironmentCalculator.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/environment/EnvironmentParameters.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/domain/model/environment/Result.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/dto/div3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/infrastructure/database/byFergeMySQLDatabase.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/infrastructure/exception/exception1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/port/div4.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/SeT15/org/byferge/core/util/MathUtil.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/byferge/core/domain/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/byferge/core/domain/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,34 +53,37 @@
   &quot;associatedIndex&quot;: 4
 }</component>
   <component name="ProjectId" id="343jfHVCdhqNXPPTarzElx3iSpc" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/viell/Hiof/SoftwareEngineering/SeT15&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/viell/Hiof/SoftwareEngineering/SeT15/src/main/java/org/example/Main.java&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "pengerOgMiljo",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/viell/Hiof/SoftwareEngineering/SeT15",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "C:/Users/viell/Hiof/SoftwareEngineering/SeT15/src/main/java/org/example/Main.java",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
-      &quot;JAVA&quot;
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "JAVA"
     ]
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
