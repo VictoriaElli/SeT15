@@ -98,6 +98,28 @@ public class Route {
         this.isActive = isActive;
     }
 
+    // NYE (EMMA)
+    // Henter første stopp (startsted)
+    public RouteStop getStartStop() {
+        // Sjekker først at lista over stopp ikke er tom eller null
+        // Hvis det ikke finnes noen stopp i ruta, får vi en feilmelding
+        if (stops == null || stops.isEmpty()) {
+            throw new IllegalStateException("Route has no stops");
+        }
+        return stops.get(0);
+    }
+
+    // Henter siste stopp (sluttsted)
+    public RouteStop getEndStop() {
+        // Sjekker at listen over stopp faktisk inneholder noe
+        if (stops == null || stops.isEmpty()) {
+            throw new IllegalStateException("Route has no stops");
+        }
+        // returnerer siste stopp i ista. Dette gjøres ved å skrive -1.
+        return stops.get(stops.size() - 1);
+    }
+
+
     // Overrides
     // returnerer rutenavn + total distanse
     @Override
@@ -130,7 +152,7 @@ public class Route {
         return thisFrom.equals(otherFrom) && thisTo.equals(otherTo);
     }
 
-    // generarer hash kode basert på id hvis satt, ellers rutenummer + fra/til stopp
+    // genererer hash kode basert på id hvis satt, ellers rutenummer + fra/til stopp
     @Override
     public int hashCode() {
         if (id != 0) {

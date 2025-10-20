@@ -17,6 +17,7 @@ public class Stop {
         this.name = name;
         setLatitude(latitude);
         setLongitude(longitude);
+        validate();
     }
 
     // brukes for å opprette et nytt stoppested uten ID.
@@ -24,6 +25,7 @@ public class Stop {
         this.name = name;
         setLatitude(latitude);
         setLongitude(longitude);
+        validate();
     }
 
     // brukes når bare ID og navn er kjent - koordinater kan legges til senere.
@@ -64,18 +66,40 @@ public class Stop {
 
     public void setName(String name) {
         this.name = name;
+        validate();
     }
 
     public void setLatitude(double latitude) {
         this.latitude = MathUtil.round(latitude, 6);
+        validate();
     }
 
     public void setLongitude(double longitude) {
         this.longitude = MathUtil.round(longitude, 6);
+        validate();
     }
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+
+    // Validation
+    // metode som sjekker at datene for stoppestedet er logiske før det lagres
+    private void validate() {
+        //denne sjekker at stoppet har et navn.
+        //hvis ikke den har et navn, sendes en feilmelding
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Stop name cannot be empty");
+        }
+        //denne sjekker at breddegraden er en riktig verdi.
+        if (latitude < -90 || latitude > 90) {
+            throw new IllegalArgumentException("Latitude must be between -90 and 90");
+        }
+        //denne sjekker at lengdegraden er en riktig verdi.
+        if (longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("Longitude must be between -180 and 180");
+        }
     }
 
     // Overrides

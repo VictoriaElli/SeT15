@@ -20,6 +20,7 @@ public class RouteStop {
         this.routeOrder = routeOrder;
         this.timeFromStart = timeFromStart;
         setDistanceFromPrevious(distanceFromPrevious);
+        validate();
     }
 
     // brukes for et nytt rutestopp uten ID.
@@ -29,6 +30,7 @@ public class RouteStop {
         this.routeOrder = routeOrder;
         this.timeFromStart = timeFromStart;
         setDistanceFromPrevious(distanceFromPrevious);
+        validate();
     }
 
     // Getters
@@ -63,15 +65,26 @@ public class RouteStop {
 
     public void setRouteOrder(int routeOrder) {
         this.routeOrder = routeOrder;
+        validate();
     }
 
     public void setTimeFromStart(int timeFromStart) {
         this.timeFromStart = timeFromStart;
+        validate();
     }
 
     // setter avstand fra forrige stopp, og avrunder til 1 desimal.
     public void setDistanceFromPrevious(double distanceFromPrevious) {
         this.distanceFromPrevious = MathUtil.round(distanceFromPrevious, 1);
+        validate();
+    }
+
+    // Validation
+    // en valideringsmetode for å sjekke at dataene er logiske
+    private void validate() {
+        if (routeOrder < 1) throw new IllegalArgumentException("routeOrder must be >= 1");
+        if (timeFromStart < 0) throw new IllegalArgumentException("timeFromStart must be >= 0");
+        if (distanceFromPrevious < 0) throw new IllegalArgumentException("distanceFromPrevious must be >= 0");
     }
 
     // Overrides

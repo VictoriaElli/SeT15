@@ -24,9 +24,12 @@ public class OperationMessage {
     public OperationMessage(int id, String message, LocalDateTime published,
                             Route route, LocalDateTime validFrom, LocalDateTime validTo) {
         this.id = id;
-        this.message = Objects.requireNonNull(message, "Message cannot be null");
+        // validerer message
+        setMessage(message);
         this.published = published != null ? published : LocalDateTime.now();
-        this.route = route;
+        // Bruker setRoute() i stedet for this.route = route
+        // Dette er for å sikre at alle driftsmeldinger alltid er knyttet til en bestemt rute
+        setRoute(route);
         setValidFrom(validFrom);
         setValidTo(validTo);
     }
@@ -35,6 +38,7 @@ public class OperationMessage {
     public OperationMessage(String message, boolean isActive, Route route,
                             LocalDateTime validFrom, LocalDateTime validTo) {
         this(0, message, LocalDateTime.now(), route, validFrom, validTo);
+        this.isActive = isActive;
     }
 
     // Getters
@@ -73,14 +77,21 @@ public class OperationMessage {
     }
 
     public void setMessage(String message) {
-        this.message = message;
+        // hindrer at message er tom. hvis den er det sendes det en feilmelding
+        if (message == null || message.isBlank()) {
+            throw new IllegalArgumentException("Message cannot be empty");
+        }
+        this.message = message.trim();
     }
 
     public void setActive(boolean active) {
         isActive = active;
     }
 
+    // Sikrer at alle driftsmeldinger har en rute.
+    // Feilmelding oppstår dersom man oppretter en feilmelding uten rute
     public void setRoute(Route route) {
+        if (route == null) throw new IllegalArgumentException("Route cannot be null");
         this.route = route;
     }
 
@@ -94,6 +105,7 @@ public class OperationMessage {
         }
         this.validFrom = validFrom;
     }
+
     // setter gyldighetsslutt og validerer forholdet til startdato. hvis null, settes lik startdato (minimum ett tidspunkt må finnes).
     public void setValidTo(LocalDateTime validTo) {
         if (validTo == null) {
@@ -144,5 +156,22 @@ public class OperationMessage {
     @Override
     public int hashCode() {
         return Objects.hash(id, message, published, isActive, route, validFrom, validTo);
+    }
+
+    // sjekker om meldingen gjelder akkurat nå (eller et gitt tidspunkt)
+    public boolean isActiveNow(LocalDateTime time) {
+        LocalDateTime t = (time != null) ? time : LocalDateTime.now();
+        return isActive
+                && validFrom != null
+                && validTo != null
+                && !t.isBefore(validFrom)
+                && !t.isAfter(validTo);
+    }
+
+    // sjekker om meldingen gjelder nå for en bestemt rute
+    public boolean isVisibleForRoute(int routeId, LocalDateTime time) {
+        return isActiveNow(time)
+                && this.route != null
+                && this.route.getId() == routeId;
     }
 }
