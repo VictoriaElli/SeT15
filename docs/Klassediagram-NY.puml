@@ -24,7 +24,7 @@ class RouteStop {
   - timeFromStart : int
   - distanceFromPrevious : double
 
-  + validate() : void
+  + validateRouteStop() : void
 }
 
 ' ========= Stop =========
@@ -35,7 +35,7 @@ class Stop {
   - longitude : double
   - isActive : boolean
 
-  + validate() : void
+  + validateStop() : void
 }
 
 ' ========= OperationMessage =========
@@ -66,7 +66,7 @@ class ExceptionEntry {
   - isActive : boolean
   - operationMessage : OperationMessage
 
-  + validate() : void
+  + validateDayDate() : void
   + appliesTo() : boolean
   + affectsStop() : boolean
   + isCancelled() : boolean

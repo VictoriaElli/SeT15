@@ -17,7 +17,7 @@ public class Stop {
         this.name = name;
         setLatitude(latitude);
         setLongitude(longitude);
-        validate();
+        validateStop();
     }
 
     // brukes for å opprette et nytt stoppested uten ID.
@@ -25,7 +25,7 @@ public class Stop {
         this.name = name;
         setLatitude(latitude);
         setLongitude(longitude);
-        validate();
+        validateStop();
     }
 
     // brukes når bare ID og navn er kjent - koordinater kan legges til senere.
@@ -66,17 +66,17 @@ public class Stop {
 
     public void setName(String name) {
         this.name = name;
-        validate();
+        validateStop();
     }
 
     public void setLatitude(double latitude) {
         this.latitude = MathUtil.round(latitude, 6);
-        validate();
+        validateStop();
     }
 
     public void setLongitude(double longitude) {
         this.longitude = MathUtil.round(longitude, 6);
-        validate();
+        validateStop();
     }
 
     public void setActive(boolean active) {
@@ -86,7 +86,7 @@ public class Stop {
 
     // Validation
     // metode som sjekker at datene for stoppestedet er logiske før det lagres
-    private void validate() {
+    private void validateStop() {
         //denne sjekker at stoppet har et navn.
         //hvis ikke den har et navn, sendes en feilmelding
         if (name == null || name.isBlank()) {

@@ -1,22 +1,26 @@
 package org.byferge.core.domain.model.environment;
 
-// kalkulerer miljøpåvirkning og kostnader basert på distanser og miljøparametere.
 public class EnvironmentCalculator {
 
-    public Result calculate(double distanceByCar, double distanceByFerry, EnvironmentParameters params) {
-        if (distanceByCar < 0 || distanceByFerry < 0) {
-            throw new IllegalArgumentException("Distances cannot be negative");
-        }
-        if (params == null) {
-            throw new IllegalArgumentException("EnvironmentParameters cannot be null");
-        }
 
-        double carCo2 = distanceByCar * params.getCarCo2PerKm();
-        double ferryCo2 = distanceByFerry * params.getFerryCo2PerKm();
+    // Funksjon som regner ut hvor mye penger og hvor mye CO2 som er spart på å ta ferge istedenfor privatbil
 
-        double carCost = distanceByCar * params.getCarCostPerKm();
-        double ferryCost = params.getferryCostPerTrip();
+    public static void calculateWhatYouHaveSaved(DistanceBetweenStops distanceBetweenStops) {
 
-        return new Result(carCo2, carCost, ferryCo2, ferryCost);
+        // Regner ut bom + distansepenger
+        double moneySaved = (distanceBetweenStops.tollgateCost() + distanceBetweenStops.distanceCost()) - EnvironmentVariables.ferryRate;
+
+        // Skriver ut ruta
+        System.out.println("På ruten " + distanceBetweenStops.from + "-" + distanceBetweenStops.destination + " har du spart:");
+
+        // Skriver ut hvor mye penger som totalt er spart i nærmeste heltall
+
+        System.out.println(java.lang.Math.round(moneySaved) + " kr.");
+
+        // Skriver ut hvor mye C02 som er spart i nærmeste heltall
+
+        System.out.println(java.lang.Math.round(distanceBetweenStops.emission()) + " gram CO2.");
     }
+
+
 }

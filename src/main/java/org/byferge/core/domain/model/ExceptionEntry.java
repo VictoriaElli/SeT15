@@ -32,7 +32,7 @@ public class ExceptionEntry {
         this.type = type;
         this.isActive = isActive;
         this.operationMessage = operationMessage;
-        validate();
+        validateDayDate();
     }
 
     // brukes for unntak som gjelder én ukedag i en sesong
@@ -49,7 +49,7 @@ public class ExceptionEntry {
         this.type = type;
         this.isActive = isActive;
         this.operationMessage = operationMessage;
-        validate();
+        validateDayDate();
     }
 
     // brukes for nytt dato-basert unntak uten ID.
@@ -68,7 +68,7 @@ public class ExceptionEntry {
 
     // Methods
     // validering av dag/dato
-    public void validate() {
+    public void validateDayDate() {
         if (validDate != null && weekday != null) {
             throw new IllegalStateException("Cannot have both validDate and weekday");
         }

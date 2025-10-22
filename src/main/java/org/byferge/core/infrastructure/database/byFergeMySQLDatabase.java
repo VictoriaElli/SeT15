@@ -3,7 +3,6 @@ package org.byferge.core.infrastructure.database;
 
 // Tilknyttning til databasen
 
-
 import java.sql.Connection;
 
 public class byFergeMySQLDatabase {
