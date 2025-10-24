@@ -1,5 +1,6 @@
 package org.byferge.core.dto;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,11 +10,11 @@ import java.util.List;
 public class SearchDeparturesResponse {
     public final int routeId;
     public final String date;
-    public final List <String> times;
+    public final List <LocalTime> departures;
 
-    public SearchDeparturesResponse(int routeId, String date, List<String> times) {
+    public SearchDeparturesResponse(int routeId, String date, List <LocalTime> departures) {
         this.routeId = routeId;
         this.date = date;
-        this.times = times;
+        this.departures = departures;
     }
 }
