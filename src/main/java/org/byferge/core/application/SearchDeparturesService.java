@@ -48,8 +48,20 @@ public class SearchDeparturesService implements SearchDeparturesUseCase {
             throw new IllegalArgumentException("Date must be in format yyy-MM-dd", e);
         }
 
-        java.util.List<java.time.LocalTime> times = repository.findDeparturesForRouteAndDate(request.routeId, date);
+        // Oppretter en liste som skal inneholde alle avgangstidene
+        // som hentes fra databasen for valgt rute og dato
+        List<LocalTime> departures = repository.findDeparturesForRouteAndDate(request.routeId, date);
 
-        return null;
+        //Her sjekker vi om listen med avganger som blir hentet ut er tom.
+        // Er den tom blir det sent en tom liste, i steden for at systemet krasjer
+        if(departures.isEmpty()){
+            return new SearchDeparturesResponse(request.routeId, request.date, List.of());
+        }
+
+        //Hvis listen inneholder avgangstider blir den sendt til brukeren
+        else {
+            return new SearchDeparturesResponse(request.routeId, request.date, departures);
+        }
+
     }
 }
