@@ -32,7 +32,7 @@ public class SearchDeparturesService implements SearchDeparturesUseCase {
         }
         // Sjekker at date ikke er tom
         // Hvis den er det får vi feilmelding
-        if(request.date == null || request.date.isBlank()) {
+        if(request.date == null) {
             throw new IllegalArgumentException("date cannot be null");
         }
         // Sjekker at routeId ikke er negativ
@@ -41,16 +41,9 @@ public class SearchDeparturesService implements SearchDeparturesUseCase {
             throw new IllegalArgumentException("routeId cannot be negative");
         }
 
-        LocalDate date;
-        try {
-            date = LocalDate.parse(request.date);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Date must be in format yyy-MM-dd", e);
-        }
-
         // Oppretter en liste som skal inneholde alle avgangstidene
         // som hentes fra databasen for valgt rute og dato
-        List<LocalTime> departures = repository.findDeparturesForRouteAndDate(request.routeId, date);
+        List<LocalTime> departures = repository.findDeparturesForRouteAndDate(request.routeId, request.date);
 
         //Her sjekker vi om listen med avganger som blir hentet ut er tom.
         // Er den tom blir det sent en tom liste, i steden for at systemet krasjer

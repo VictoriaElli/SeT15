@@ -1,5 +1,6 @@
 package org.byferge.core.dto;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +10,10 @@ import java.util.List;
 //  Vi får tilbake ruteId og dato og en liste med klokkeslett.
 public class SearchDeparturesResponse {
     public final int routeId;
-    public final String date;
+    public final LocalDate date;
     public final List <LocalTime> departures;
 
-    public SearchDeparturesResponse(int routeId, String date, List <LocalTime> departures) {
+    public SearchDeparturesResponse(int routeId, LocalDate date, List <LocalTime> departures) {
         this.routeId = routeId;
         this.date = date;
         this.departures = departures;
