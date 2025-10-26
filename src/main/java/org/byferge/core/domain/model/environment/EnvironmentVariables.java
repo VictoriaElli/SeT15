@@ -1,6 +1,6 @@
 package org.byferge.core.domain.model.environment;
 
-public class Variables {
+public class EnvironmentVariables {
 
 
     // Standard sats per kilometer i kr

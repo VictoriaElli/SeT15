@@ -1,0 +1,143 @@
+@startuml
+title Klasser for appen til Byfergene i Fredrikstad
+
+' ========= Route =========
+class Route {
+  - id : int
+  - routeNum : int
+  - stops : List<RouteStop>
+  - isActive : boolean
+
+  + addStop(stop : RouteStop) : void
+  + getName() : String
+  + calculateTotalDistance() : double
+  + getStartStop() : RouteStop
+  + getEndStop() : RouteStop
+}
+
+' ========= RouteStop =========
+class RouteStop {
+  - id : int
+  - route : Route
+  - stop : Stop
+  - routeOrder : int
+  - timeFromStart : int
+  - distanceFromPrevious : double
+
+  + validateRouteStop() : void
+}
+
+' ========= Stop =========
+class Stop {
+  - id : int
+  - name : String
+  - latitude : double
+  - longitude : double
+  - isActive : boolean
+
+  + validateStop() : void
+}
+
+' ========= OperationMessage =========
+class OperationMessage {
+  - id : int
+  - message : String
+  - published : LocalDateTime
+  - isActive : boolean
+  - route : Route
+  - validFrom : LocalDateTime
+  - validTo : LocalDateTime
+
+  + setMessage(message : String) : void
+  + isActiveNow(time : LocalDateTime) : boolean
+  + isVisibleForRoute(routeId : int, time : LocalDateTime) : boolean
+}
+
+' ========= ExceptionEntry =========
+class ExceptionEntry {
+  - id : int
+  - route : Route
+  - stop : Stop
+  - validDate : LocalDate
+  - weekday : Weekday
+  - season : Season
+  - departureTime : LocalTime
+  - type : ExceptionType
+  - isActive : boolean
+  - operationMessage : OperationMessage
+
+  + validateDayDate() : void
+  + appliesTo() : boolean
+  + affectsStop() : boolean
+  + isCancelled() : boolean
+}
+
+' ========= Frequency =========
+class Frequency {
+  - id : int
+  - route : Route
+  - weekday : Weekday
+  - season : Season
+  - firstDeparture : LocalTime
+  - lastDeparture : LocalTime
+  - intervalMinutes : int
+
+  + setIntervalMinutes(intervalMinutes : int) : void
+  + getDepartureTimes(): List<LocalTime>
+  + isWithinTimeRange(LocalTime time): boolean
+  + conflictsWith(Frequency other): boolean
+  + totalOperationTime(): Duration
+}
+
+' ========= Season =========
+class Season {
+  - id : int
+  - seasonType : String
+  - year : int
+  - startDate : LocalDate
+  - endDate : LocalDate
+
+  + validateDatesMatchYear() : void
+  + isActiveOn() : boolean
+  + overlapsWith(Season other) : boolean
+  + getIdentifier() : String
+}
+
+' ========= Enums =========
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+
+  + static Weekday fromLocalDate(LocalDate date)
+}
+
+enum ExceptionType {
+  EXTRA
+  DELAYED
+  CANCELLED
+  OMITTED
+}
+
+' ========= Relasjoner (mer naturlige beskrivelser) =========
+Route "1" o-- "*" RouteStop : består av flere stopp langs ruten
+RouteStop "*" --> "1" Stop : viser til et konkret stoppested
+
+OperationMessage --> Route : knyttes til én bestemt rute
+
+Frequency "*" --> "1" Route : beskriver rutens avgangshyppighet
+Frequency --> Weekday : opprettes for en bestemt ukedag
+Frequency --> Season : gjelder innen en sesongperiode
+
+ExceptionEntry --> Route : registreres på en bestemt rute
+ExceptionEntry --> Stop : kan omhandle et spesifikt stoppested
+ExceptionEntry --> Weekday : kan gjelde for en ukedag
+ExceptionEntry --> Season : tilhører en bestemt sesong
+ExceptionEntry --> ExceptionType : angir hvilket type avvik
+ExceptionEntry --> OperationMessage : kan være koblet til driftsmelding
+
+@enduml
