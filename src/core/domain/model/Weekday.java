@@ -1,4 +1,4 @@
-package org.byferge.core.domain.model;
+package core.domain.model;
 
 import java.time.LocalDate;
 

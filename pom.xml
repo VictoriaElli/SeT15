@@ -8,6 +8,12 @@
     <artifactId>SeT15</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+        <testSourceDirectory>src/tests</testSourceDirectory>
+    </build>
+
+
     <properties>
         <maven.compiler.source>23</maven.compiler.source>
         <maven.compiler.target>23</maven.compiler.target>
