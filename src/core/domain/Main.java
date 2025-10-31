@@ -1,7 +1,7 @@
-package org.byferge.core.domain;
+package core.domain;
 
-import org.byferge.core.domain.model.environment.EnvironmentCalculator;
-import org.byferge.core.domain.model.environment.DistanceBetweenStops;
+import core.domain.model.environment.EnvironmentCalculator;
+import core.domain.model.environment.DistanceBetweenStops;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
