@@ -1,0 +1,35 @@
+@startuml
+title Bruker: Søke fergetider via view (konkret eksempel)
+
+actor "Bruker" as User
+
+participant "Bruker View (UI)" as View
+participant "RESP API (Controller)" as Controller
+participant "DeparturesService" as Service
+participant "DeparturesRepository" as Repo
+participant "Database" as DB
+
+User -> View: Velg fra='Cicignon', til='Gamlebyen', ukedag='MONDAY', tid>='16:00:00'
+View -> Controller: GET /api/departures/search?from=Cicignon&to=Gamlebyen&weekday=MONDAY&time=16:00:00
+Controller -> Controller: Valider input
+Controller -> Service: searchDepartures(from='Cicignon', to='Gamlebyen', weekday='MONDAY', time='16:00:00')
+Service -> Repo: getDepartures(from='Cicignon', to='Gamlebyen', weekday='MONDAY', time='16:00:00')
+
+Repo -> DB: Hent avganger
+note right of DB
+SELECT *
+FROM view_timetable_from_to
+WHERE fromStop = 'Cicignon'
+  AND toStop = 'Gamlebyen'
+  AND weekday = 'MONDAY'
+  AND departureFrom >= '16:00:00'
+ORDER BY departureFrom;
+end note
+
+DB --> Repo: Liste over avganger
+Repo --> Service: Formaterte avganger
+Service --> Controller: Returner avganger
+Controller --> View: JSON med avganger
+View --> User: Vis avganger i UI
+
+@enduml
