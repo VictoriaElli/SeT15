@@ -1,4 +1,9 @@
 package domain;
+import org.byferge.core.domain.model.environment.DistanceBetweenStops;
+import org.byferge.core.domain.model.environment.EnvironmentVariables;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 public class enviromentMethodsTest {
 
