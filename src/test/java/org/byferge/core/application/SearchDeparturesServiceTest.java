@@ -74,13 +74,13 @@ public class SearchDeparturesServiceTest {
         int routeId = 6;
         LocalDate date = LocalDate.of(2025,12,7);
 
-        //Repoet finner ingenting og returnerer en tom liste
+        //Repoet finner ingen avganger og returnerer en tom liste
         Mockito.when(mockDepartureRepository.findDeparturesForRouteAndDate(routeId, date)).thenReturn(List.of());
 
         //Vi oppretter servicen med mocking-repo
-        service = new SearchDeparturesService((mockDepartureRepository));
+        service = new SearchDeparturesService(mockDepartureRepository);
 
-        SearchDeparturesRequest request = new SearchDeparturesRequest(LocalDate.of(2025, 12, 7), 6);
+        SearchDeparturesRequest request = new SearchDeparturesRequest(date, routeId);
         SearchDeparturesResponse response = service.search(request);
 
         // ASSERT
