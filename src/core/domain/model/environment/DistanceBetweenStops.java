@@ -1,4 +1,4 @@
-package org.byferge.core.domain.model.environment;
+package core.domain.model.environment;
 
 public class DistanceBetweenStops {
 
