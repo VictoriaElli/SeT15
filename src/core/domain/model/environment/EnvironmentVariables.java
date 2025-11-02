@@ -48,7 +48,7 @@ public class EnvironmentVariables {
 
     // Formel for pris for en gjennomsnittlig passering gjennom en bom i kr
 
-    public final static double averageCostThruTollgate = (averageCostThruTollgateWithChip * passWithChip) + (averageCostThruTollgateWithoutChip * passWithoutChip);
+    public static double averageCostThruTollgate = (averageCostThruTollgateWithChip * passWithChip) + (averageCostThruTollgateWithoutChip * passWithoutChip);
 
     // Formel for gjennomsnitlig CO2 utslipp er km i gram
 
