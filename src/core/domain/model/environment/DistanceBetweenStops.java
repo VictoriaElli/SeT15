@@ -1,11 +1,13 @@
-package core.domain.model.environment;
+package org.byferge.core.domain.model.environment;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DistanceBetweenStops {
 
-    public String from;
-    public String destination;
-    public double distance;
-    public boolean tollgate;
+    private String from;
+    private String destination;
+    private double distance;
+    private boolean tollgate;
 
 
     // Konstruktør
@@ -14,27 +16,43 @@ public class DistanceBetweenStops {
         this.destination = destination;
         this.distance = distance;
         this.tollgate = tollgate;
+
+        // Funksjonene som skal være med på JSON-formatet
+        emissionSaved();
+        costSaved();
+    }
+
+    // Tom konstruktør for Jackson
+    public DistanceBetweenStops() {
     }
 
 
     // Funksjon for å finne ut om bom skal betales, og hvis det skal betales så koster det averageCostThruTollgate
-
-    public double tollgateCost(){
+    // Hvis tollgate = false, så skal det ikke regne med bompenger
+    public double tollgateCostSaved(){
         return this.tollgate ? EnvironmentVariables.averageCostThruTollgate : 0;
     }
 
     // Funksjon for å finne ut hvor mye man sparer på å ta ferga etter hvor mange kilometer det er mellom stoppene
     // Distanse * 3.5 kr per kilometer
-
-    public double distanceCost() {
+    public double distanceCostSaved() {
         return this.distance * EnvironmentVariables.standardRatePrKm;
     }
 
     // Funksjon for å finne ut hvor mye CO2 man sparer på å kjøre ferga istedenfor en gjennomsnittlig bil
-    // Distanse * gjennomsnittlig CO2 utslipp
+    // Distanse * gjennomsnittlig CO2 utslipp, rundet til nærmeste heltall
+    // JsonProperty for å kunne transformere resultatet av funksjonen til JSON-format
+    @JsonProperty
+    public double emissionSaved() {
+        return java.lang.Math.round(this.distance * EnvironmentVariables.averageEmissionPrKm);
+    }
 
-    public double emission() {
-        return this.distance * EnvironmentVariables.averageEmissionPrKm;
+    // Funksjson som regner total kostnad spart på å ta ferge istedenfor bil
+    // bompengerspart + distansepenger spart
+    // JsonProperty for å kunne transformere resultatet av funksjonen til JSON-format
+    @JsonProperty
+    public double costSaved() {
+        return java.lang.Math.round((tollgateCostSaved() + distanceCostSaved()) - EnvironmentVariables.ferryRate);
     }
 
 
