@@ -1,0 +1,15 @@
+[ {
+  "from" : "Gamlebyen",
+  "destination" : "Cicignon",
+  "distance" : 3.6,
+  "tollgate" : true,
+  "emissionSaved" : 359.0,
+  "costSaved" : 37.0
+}, {
+  "from" : "Gamlebyen",
+  "destination" : "Smertu",
+  "distance" : 4.3,
+  "tollgate" : true,
+  "emissionSaved" : 429.0,
+  "costSaved" : 39.0
+} ]

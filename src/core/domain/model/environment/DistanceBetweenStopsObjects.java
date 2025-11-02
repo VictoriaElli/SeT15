@@ -1,8 +1,10 @@
 package core.domain.model.environment;
 
-import core.adapter.ferryRoutesJSONRepository;
-import org.byferge.core.domain.model.Route;
 
+
+
+import core.dto.ferryRoutesJSONRepository;
+import core.domain.model.environment.DistanceBetweenStops;
 
 import java.io.File;
 import java.time.LocalDate;
@@ -15,7 +17,7 @@ public class DistanceBetweenStopsObjects {
 
 
         // Arrayliste som skal holde på alle objektene av DistanceBetweenStops. Altså alle ferge rutene
-        ArrayList<org.byferge.core.domain.model.environment.DistanceBetweenStops> ferryRoutes = new ArrayList<>();
+        ArrayList<DistanceBetweenStops> ferryRoutes = new ArrayList<>();
 
 
         // Fra Gamlebyen
