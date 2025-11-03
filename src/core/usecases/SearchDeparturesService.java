@@ -1,13 +1,11 @@
-package org.byferge.core.application;
+package usecases;
 
-import org.byferge.core.dto.SearchDeparturesRequest;
-import org.byferge.core.dto.SearchDeparturesResponse;
-import org.byferge.core.port.in.SearchDeparturesUseCase;
-import org.byferge.core.port.out.DepartureRepository;
+import dto.SearchDeparturesRequest;
+import dto.SearchDeparturesResponse;
+import port.in.SearchDeparturesUseCase;
+import port.out.DepartureRepository;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 // Oppretter en Service som bestemmer søkelogikken

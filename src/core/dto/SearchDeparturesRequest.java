@@ -1,4 +1,4 @@
-package org.byferge.core.dto;
+package dto;
 
 import java.time.LocalDate;
 

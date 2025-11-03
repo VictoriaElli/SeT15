@@ -1,8 +1,9 @@
-package tests.unitTesting;
+package unitTesting;
 
-import core.dto.SearchDeparturesRequest;
-import core.dto.SearchDeparturesResponse;
-import core.port.out.DepartureRepository;
+import dto.SearchDeparturesRequest;
+import dto.SearchDeparturesResponse;
+import port.out.DepartureRepository;
+import usecases.SearchDeparturesService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

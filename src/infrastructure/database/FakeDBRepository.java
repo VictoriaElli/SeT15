@@ -1,6 +1,6 @@
-package org.byferge.core.infrastructure.database;
+package database;
 
-import org.byferge.core.port.out.DepartureRepository;
+import port.out.DepartureRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

@@ -1,8 +1,7 @@
-package org.byferge.core.dto;
+package dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 // Dette er en DTO (Data Transfer Object) og
