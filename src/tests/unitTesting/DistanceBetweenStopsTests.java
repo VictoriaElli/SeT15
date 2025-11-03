@@ -1,5 +1,4 @@
-package tests.unitTesting;
-
+package unitTesting;
 
 import core.domain.model.environment.DistanceBetweenStops;
 import core.domain.model.environment.EnvironmentVariables;
@@ -9,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
 
-public class distanceBetweenStopsTests {
+public class DistanceBetweenStopsTests {
 
     @Test
     @DisplayName("Check tollgateCostSaved when tollgate is true")

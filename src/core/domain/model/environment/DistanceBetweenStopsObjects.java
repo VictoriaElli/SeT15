@@ -1,10 +1,7 @@
 package core.domain.model.environment;
 
-
-
-
 import core.dto.ferryRoutesJSONRepository;
-import core.domain.model.environment.DistanceBetweenStops;
+
 
 import java.io.File;
 import java.util.ArrayList;
