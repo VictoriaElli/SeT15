@@ -1,8 +1,8 @@
-package org.byferge.core.application;
+package tests.unitTesting;
 
-import org.byferge.core.dto.SearchDeparturesRequest;
-import org.byferge.core.dto.SearchDeparturesResponse;
-import org.byferge.core.port.out.DepartureRepository;
+import core.dto.SearchDeparturesRequest;
+import core.dto.SearchDeparturesResponse;
+import core.port.out.DepartureRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
