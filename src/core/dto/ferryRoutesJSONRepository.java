@@ -1,10 +1,10 @@
-package core.dto;
+package dto;
 
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import core.domain.model.environment.DistanceBetweenStops;
-import core.port.ferryRoutesRepository;
+import domain.model.environment.DistanceBetweenStops;
+import port.ferryRoutesRepository;
 
 import java.io.File;
 import java.io.IOException;

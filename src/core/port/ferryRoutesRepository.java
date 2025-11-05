@@ -1,6 +1,6 @@
-package core.port;
+package port;
 
-import core.domain.model.environment.DistanceBetweenStops;
+import domain.model.environment.DistanceBetweenStops;
 
 
 import java.util.ArrayList;

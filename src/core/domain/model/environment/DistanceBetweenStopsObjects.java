@@ -1,6 +1,7 @@
-package core.domain.model.environment;
+package domain.model.environment;
 
-import core.dto.ferryRoutesJSONRepository;
+import dto.ferryRoutesJSONRepository;
+import domain.model.environment.DistanceBetweenStops;
 
 
 import java.io.File;
@@ -128,13 +129,18 @@ public class DistanceBetweenStopsObjects {
 
 
         // Henter alle fergerutene fra JSON-filen
+
+
         ferryRoutesJSON.getAllFerryRoutes();
 
-        // For-løkke for å skrive ut alle rutene som er i JSON-filen
+        // For-løkke for å skrive ut alle rutene som er i JSON-filen i terminalen
         for (DistanceBetweenStops ferry : ferryRoutesJSON.getAllFerryRoutes()) {
             System.out.println("From: " + ferry.getFrom() + ", Destination: " + ferry.getDestination());
             System.out.println();
         }
+
+
+
 
 
     }

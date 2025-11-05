@@ -1,7 +1,7 @@
-package core.domain;
+package domain;
 
-import core.domain.model.environment.EnvironmentCalculator;
-import core.domain.model.environment.DistanceBetweenStops;
+import domain.model.environment.EnvironmentCalculator;
+import domain.model.environment.DistanceBetweenStops;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.

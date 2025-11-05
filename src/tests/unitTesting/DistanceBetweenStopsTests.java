@@ -1,7 +1,7 @@
 package unitTesting;
 
-import core.domain.model.environment.DistanceBetweenStops;
-import core.domain.model.environment.EnvironmentVariables;
+import domain.model.environment.DistanceBetweenStops;
+import domain.model.environment.EnvironmentVariables;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
