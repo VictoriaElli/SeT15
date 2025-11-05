@@ -1,6 +1,4 @@
-package core.domain.model.environment;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package domain.model.environment;
 
 public class DistanceBetweenStops {
 
@@ -8,6 +6,8 @@ public class DistanceBetweenStops {
     private String destination;
     private double distance;
     private boolean tollgate;
+    private double emissionSaved;
+    private double costSaved;
 
 
     // Konstruktør
@@ -18,8 +18,8 @@ public class DistanceBetweenStops {
         this.tollgate = tollgate;
 
         // Funksjonene som skal være med på JSON-formatet
-        emissionSaved();
-        costSaved();
+        this.emissionSaved = emissionSaved();
+        this.costSaved = costSaved();
     }
 
     // Tom konstruktør for Jackson
@@ -42,7 +42,7 @@ public class DistanceBetweenStops {
     // Funksjon for å finne ut hvor mye CO2 man sparer på å kjøre ferga istedenfor en gjennomsnittlig bil
     // Distanse * gjennomsnittlig CO2 utslipp, rundet til nærmeste heltall
     // JsonProperty for å kunne transformere resultatet av funksjonen til JSON-format
-    @JsonProperty
+
     public double emissionSaved() {
         return java.lang.Math.round(this.distance * EnvironmentVariables.averageEmissionPrKm);
     }
@@ -50,7 +50,7 @@ public class DistanceBetweenStops {
     // Funksjson som regner total kostnad spart på å ta ferge istedenfor bil
     // bompengerspart + distansepenger spart
     // JsonProperty for å kunne transformere resultatet av funksjonen til JSON-format
-    @JsonProperty
+
     public double costSaved() {
         return java.lang.Math.round((tollgateCostSaved() + distanceCostSaved()) - EnvironmentVariables.ferryRate);
     }
@@ -90,5 +90,19 @@ public class DistanceBetweenStops {
         this.tollgate = tollgate;
     }
 
+    public double getEmissionSaved() {
+        return emissionSaved;
+    }
 
+    public void setEmissionSaved(double emissionSaved) {
+        this.emissionSaved = emissionSaved;
+    }
+
+    public double getCostSaved() {
+        return costSaved;
+    }
+
+    public void setCostSaved(double costSaved) {
+        this.costSaved = costSaved;
+    }
 }
