@@ -12,4 +12,228 @@
   "tollgate" : true,
   "emissionSaved" : 429.0,
   "costSaved" : 39.0
+}, {
+  "from" : "Gamlebyen",
+  "destination" : "Sentrum",
+  "distance" : 4.3,
+  "tollgate" : true,
+  "emissionSaved" : 429.0,
+  "costSaved" : 39.0
+}, {
+  "from" : "Gamlebyen",
+  "destination" : "Værste",
+  "distance" : 5.1,
+  "tollgate" : true,
+  "emissionSaved" : 509.0,
+  "costSaved" : 42.0
+}, {
+  "from" : "Gamlebyen",
+  "destination" : "Gressvik",
+  "distance" : 8.6,
+  "tollgate" : true,
+  "emissionSaved" : 858.0,
+  "costSaved" : 54.0
+}, {
+  "from" : "Gamlebyen",
+  "destination" : "Ålekilen",
+  "distance" : 9.5,
+  "tollgate" : true,
+  "emissionSaved" : 948.0,
+  "costSaved" : 57.0
+}, {
+  "from" : "Smertu",
+  "destination" : "Gamlebyen",
+  "distance" : 4.3,
+  "tollgate" : false,
+  "emissionSaved" : 429.0,
+  "costSaved" : 15.0
+}, {
+  "from" : "Smertu",
+  "destination" : "Sentrum",
+  "distance" : 2.4,
+  "tollgate" : false,
+  "emissionSaved" : 239.0,
+  "costSaved" : 8.0
+}, {
+  "from" : "Smertu",
+  "destination" : "Værste",
+  "distance" : 1.9,
+  "tollgate" : false,
+  "emissionSaved" : 190.0,
+  "costSaved" : 7.0
+}, {
+  "from" : "Smertu",
+  "destination" : "Gressvik",
+  "distance" : 6.8,
+  "tollgate" : false,
+  "emissionSaved" : 679.0,
+  "costSaved" : 24.0
+}, {
+  "from" : "Smertu",
+  "destination" : "Ålekilen",
+  "distance" : 7.2,
+  "tollgate" : false,
+  "emissionSaved" : 718.0,
+  "costSaved" : 25.0
+}, {
+  "from" : "Sentrum",
+  "destination" : "Gamlebyen",
+  "distance" : 4.3,
+  "tollgate" : false,
+  "emissionSaved" : 429.0,
+  "costSaved" : 15.0
+}, {
+  "from" : "Sentrum",
+  "destination" : "Smertu",
+  "distance" : 2.4,
+  "tollgate" : false,
+  "emissionSaved" : 239.0,
+  "costSaved" : 8.0
+}, {
+  "from" : "Sentrum",
+  "destination" : "Værste",
+  "distance" : 2.3,
+  "tollgate" : false,
+  "emissionSaved" : 230.0,
+  "costSaved" : 8.0
+}, {
+  "from" : "Sentrum",
+  "destination" : "Gressvik",
+  "distance" : 5.8,
+  "tollgate" : false,
+  "emissionSaved" : 579.0,
+  "costSaved" : 20.0
+}, {
+  "from" : "Sentrum",
+  "destination" : "Ålekilen",
+  "distance" : 6.8,
+  "tollgate" : false,
+  "emissionSaved" : 679.0,
+  "costSaved" : 24.0
+}, {
+  "from" : "Værste",
+  "destination" : "Gamlebyen",
+  "distance" : 5.1,
+  "tollgate" : false,
+  "emissionSaved" : 509.0,
+  "costSaved" : 18.0
+}, {
+  "from" : "Værste",
+  "destination" : "Smertu",
+  "distance" : 1.9,
+  "tollgate" : false,
+  "emissionSaved" : 190.0,
+  "costSaved" : 7.0
+}, {
+  "from" : "Værste",
+  "destination" : "Sentrum",
+  "distance" : 2.3,
+  "tollgate" : false,
+  "emissionSaved" : 230.0,
+  "costSaved" : 8.0
+}, {
+  "from" : "Værste",
+  "destination" : "Gressvik",
+  "distance" : 5.4,
+  "tollgate" : false,
+  "emissionSaved" : 539.0,
+  "costSaved" : 19.0
+}, {
+  "from" : "Værste",
+  "destination" : "Ålekilen",
+  "distance" : 6.4,
+  "tollgate" : false,
+  "emissionSaved" : 639.0,
+  "costSaved" : 22.0
+}, {
+  "from" : "Gressvik",
+  "destination" : "Gamlebyen",
+  "distance" : 8.6,
+  "tollgate" : true,
+  "emissionSaved" : 858.0,
+  "costSaved" : 54.0
+}, {
+  "from" : "Gressvik",
+  "destination" : "Smertu",
+  "distance" : 6.8,
+  "tollgate" : true,
+  "emissionSaved" : 679.0,
+  "costSaved" : 48.0
+}, {
+  "from" : "Gressvik",
+  "destination" : "Sentrum",
+  "distance" : 5.8,
+  "tollgate" : true,
+  "emissionSaved" : 579.0,
+  "costSaved" : 44.0
+}, {
+  "from" : "Gressvik",
+  "destination" : "Værste",
+  "distance" : 5.4,
+  "tollgate" : true,
+  "emissionSaved" : 539.0,
+  "costSaved" : 43.0
+}, {
+  "from" : "Gressvik",
+  "destination" : "Ålekilen",
+  "distance" : 1.8,
+  "tollgate" : false,
+  "emissionSaved" : 180.0,
+  "costSaved" : 6.0
+}, {
+  "from" : "Ålekilen",
+  "destination" : "Gamlebyen",
+  "distance" : 9.5,
+  "tollgate" : true,
+  "emissionSaved" : 948.0,
+  "costSaved" : 57.0
+}, {
+  "from" : "Ålekilen",
+  "destination" : "Smertu",
+  "distance" : 7.2,
+  "tollgate" : true,
+  "emissionSaved" : 718.0,
+  "costSaved" : 49.0
+}, {
+  "from" : "Ålekilen",
+  "destination" : "Sentrum",
+  "distance" : 6.8,
+  "tollgate" : true,
+  "emissionSaved" : 679.0,
+  "costSaved" : 48.0
+}, {
+  "from" : "Ålekilen",
+  "destination" : "Værste",
+  "distance" : 6.4,
+  "tollgate" : true,
+  "emissionSaved" : 639.0,
+  "costSaved" : 46.0
+}, {
+  "from" : "Ålekilen",
+  "destination" : "Gressvik",
+  "distance" : 1.8,
+  "tollgate" : false,
+  "emissionSaved" : 180.0,
+  "costSaved" : 6.0
+}, {
+  "from" : "Cicignon",
+  "destination" : "Gamlebyen",
+  "distance" : 3.6,
+  "tollgate" : false,
+  "emissionSaved" : 359.0,
+  "costSaved" : 13.0
+}, {
+  "from" : "Lisleby",
+  "destination" : "Sellebakk",
+  "distance" : 10.2,
+  "tollgate" : false,
+  "emissionSaved" : 1018.0,
+  "costSaved" : 36.0
+}, {
+  "from" : "Sellebakk",
+  "destination" : "Lisleby",
+  "distance" : 10.2,
+  "tollgate" : true,
+  "emissionSaved" : 1018.0,
+  "costSaved" : 60.0
 } ]
