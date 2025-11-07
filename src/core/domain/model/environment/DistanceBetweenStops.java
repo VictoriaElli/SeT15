@@ -1,4 +1,4 @@
-package core.domain.model.environment;
+package domain.model.environment;
 
 public class DistanceBetweenStops {
 
