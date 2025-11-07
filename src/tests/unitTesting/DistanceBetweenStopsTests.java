@@ -58,9 +58,22 @@ public class DistanceBetweenStopsTests {
 
         // Assert
         Assertions.assertEquals(100, result);
+    }
 
+    @Test
+    @DisplayName("Check emissionSaved")
+    public void correctEmissionSaved() {
 
+        // Arrange
+        DistanceBetweenStops object = new DistanceBetweenStops();
+        object.setDistance(10.00);
+        EnvironmentVariables.averageEmissionPrKm = 10.00;
 
+        // Act
+        double result = object.emissionSaved();
+
+        // Assert
+        Assertions.assertEquals(100, result);
     }
 
 
