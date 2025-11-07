@@ -44,6 +44,25 @@ public class DistanceBetweenStopsTests {
 
     }
 
+    @Test
+    @DisplayName("Check distanceCostSaved")
+    public void correctDistanceCostSaved() {
+
+        // Arrange
+        DistanceBetweenStops object = new DistanceBetweenStops();
+        object.setDistance(10);
+        EnvironmentVariables.standardRatePrKm = 10;
+
+        // Act
+        double result = object.distanceCostSaved();
+
+        // Assert
+        Assertions.assertEquals(100, result);
+
+
+
+    }
+
 
 
 

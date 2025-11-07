@@ -1,6 +1,6 @@
 package domain.model.environment;
 
-import dto.ferryRoutesJSONRepository;
+import port.ferryRoutesJSONRepository;
 import domain.model.environment.DistanceBetweenStops;
 
 
