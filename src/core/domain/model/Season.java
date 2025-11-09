@@ -1,4 +1,4 @@
-package core.domain.model;
+package domain.model;
 
 import java.time.LocalDate;
 import java.util.Objects;
