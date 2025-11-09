@@ -33,7 +33,7 @@ public class DistanceBetweenStopsTests {
 
         // Arrange
         DistanceBetweenStops object = new DistanceBetweenStops();
-        object.setTollgate(true);
+        object.setTollgate(false);
         EnvironmentVariables.averageCostThruTollgate = 30;
 
         // Act
