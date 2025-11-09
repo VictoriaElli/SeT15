@@ -2,8 +2,8 @@ package usecases;
 
 import dto.SearchDeparturesRequest;
 import dto.SearchDeparturesResponse;
-import port.in.SearchDeparturesUseCase;
-import port.out.DepartureRepository;
+import port.inbound.SearchDeparturesUseCase;
+import port.outbound.DepartureRepository;
 
 import java.time.LocalTime;
 import java.util.List;
