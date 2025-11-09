@@ -1,4 +1,4 @@
-package port.in;
+package port.inbound;
 
 import dto.SearchDeparturesRequest;
 import dto.SearchDeparturesResponse;

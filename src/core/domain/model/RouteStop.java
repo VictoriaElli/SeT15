@@ -1,6 +1,6 @@
-package core.domain.model;
+package domain.model;
 
-import core.domain.model.util.MathUtil;
+import domain.model.util.MathUtil;
 
 // representerer en stopp i en rute, inneholder info om rekkefølge, tid fra start og avstand fra forrige stopp.
 public class RouteStop {

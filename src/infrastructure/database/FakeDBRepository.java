@@ -1,6 +1,6 @@
 package database;
 
-import port.out.DepartureRepository;
+import port.outbound.DepartureRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

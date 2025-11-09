@@ -1,6 +1,6 @@
-package core.domain.model;
+package domain.model;
 
-import core.domain.model.util.MathUtil;
+import domain.model.util.MathUtil;
 
 import java.util.ArrayList;
 import java.util.List;
