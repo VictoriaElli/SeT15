@@ -1,4 +1,4 @@
-package core.domain.model.util;
+package domain.model.util;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
