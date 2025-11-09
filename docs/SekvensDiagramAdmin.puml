@@ -1,0 +1,23 @@
+@startuml
+title Admin: Oppdatere fergetider (frekvens-tabell)
+
+actor "Admin-bruker" as Admin
+participant "Admin View (UI)" as View
+participant "Admin API (Controller)" as Controller
+participant "DeparturesService" as Service
+participant "DeparturesRepository" as Repo
+participant "Database" as DB
+
+Admin -> View: Fyll inn routeId, firstDeparture, lastDeparture, intervalMinutes, weekday, seasonId
+View -> Controller: submitUpdateForm(updateDepartures(...) body)
+Controller -> Controller: Valider input + sjekk admin-autorisasjon
+Controller -> Service: updateDepartures(routeId, firstDeparture, lastDeparture, intervalMinutes, weekday, seasonId)
+Service -> Service: Sjekk at firstDeparture < lastDeparture
+Service -> Repo: saveOrUpdateFrequency(routeId, firstDeparture, lastDeparture, intervalMinutes, weekday, seasonId)
+Repo -> DB: INSERT/UPDATE frekvens-tabell
+DB --> Repo: Bekreftelse
+Repo --> Service: Lagret
+Service --> Controller: Status (OK / Error)
+Controller --> View: Returner respons
+View --> Admin: Vis bekreftelse / feilmelding
+@enduml

@@ -123,6 +123,52 @@ enum ExceptionType {
   OMITTED
 }
 
+' ========= Environment =========
+class DistanceBetweenStops {
+  - from : String
+  - destination : String
+  - distance : double
+  - tollgate : boolean
+
+  + tollgateCostSaved() : double
+  + distanceCostSaved() : double
+  + emissionSaved() : double
+  + costSaved() : double
+}
+
+class EnvironmentCalculator {
+  + calculateWhatYouHaveSaved(DistanceBetweenStops : distanceBetweenStops) : void
+}
+
+class EnvironmentVariables {
+    + {static} standardRatePrKm : double
+    + {static} ferryRate : double
+    + {static} percentageElectric : double
+    + {static} percentageGasoline : double
+    + {static} percentageDiesel : double
+    + {static} percentageFuel : double
+    + {static} fuelWithoutChip : double
+    + {static} electricWithoutChip : double
+    + {static} fuelWithChip : double
+    + {static} electricWithChip : double
+    + {static} passWithChip : double
+    + {static} passWithoutChip : double
+    + {static} emissionElectric : double
+    + {static} emissionGasoline : double
+    + {static} emissionDiesel : double
+    + {static} averageCostThruTollgateWithChip : double
+    + {static} averageCostThruTollgateWithoutChip : double
+    + {static} averageCostThruTollgate : double
+    + {static} averageEmissionPrKm : double
+}
+
+
+EnvironmentCalculator --> DistanceBetweenStops : henter informasjon for kalkulasjoner
+EnvironmentCalculator --> EnvironmentVariables : henter variabler for kalkulasjoner
+
+
+
+
 ' ========= Relasjoner (mer naturlige beskrivelser) =========
 Route "1" o-- "*" RouteStop : består av flere stopp langs ruten
 RouteStop "*" --> "1" Stop : viser til et konkret stoppested
@@ -139,5 +185,6 @@ ExceptionEntry --> Weekday : kan gjelde for en ukedag
 ExceptionEntry --> Season : tilhører en bestemt sesong
 ExceptionEntry --> ExceptionType : angir hvilket type avvik
 ExceptionEntry --> OperationMessage : kan være koblet til driftsmelding
+
 
 @enduml
