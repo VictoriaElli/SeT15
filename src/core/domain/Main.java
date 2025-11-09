@@ -1,4 +1,4 @@
-package core.domain;
+package domain;
 
 import core.domain.model.environment.EnvironmentCalculator;
 import core.domain.model.environment.DistanceBetweenStops;
