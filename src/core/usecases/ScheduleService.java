@@ -1,7 +1,6 @@
 package usecases;
 
 import domain.model.*;
-import org.springframework.stereotype.Service;
 import port.outbound.ExceptionEntryRepository;
 import port.outbound.FrequencyRepository;
 
@@ -10,7 +9,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
 public class ScheduleService {
 
     private final FrequencyRepository frequencyRepo;
@@ -41,6 +39,8 @@ public class ScheduleService {
         List<ExceptionEntry> exceptions = exceptionRepo.findByRouteStopAndDate(route, stop, date);
         for (ExceptionEntry ex : exceptions) {
             if (ex.isCancelled()) {
+                times.remove(ex.getDepartureTime());
+            } else if (ex.isOmitted()) {
                 times.remove(ex.getDepartureTime());
             } else {
                 times.add(ex.getDepartureTime());
