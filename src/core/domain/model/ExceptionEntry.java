@@ -101,9 +101,24 @@ public class ExceptionEntry {
         return stop != null && stop.equals(checkStop);
     }
 
+    // enklere sjekk for ekstra
+    public boolean isExtra() {
+        return type == ExceptionType.EXTRA;
+    }
+
+    // enklere sjekk for forsinkelser
+    public boolean isDelayed() {
+        return type == ExceptionType.DELAYED;
+    }
+
     // enklere sjekk for kanselleringer
     public boolean isCancelled() {
         return type == ExceptionType.CANCELLED;
+    }
+
+    // enklere sjekk for utelatelser
+    public boolean isOmitted() {
+        return type == ExceptionType.OMITTED;
     }
 
 
