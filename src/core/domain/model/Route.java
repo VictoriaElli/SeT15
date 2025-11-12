@@ -5,43 +5,79 @@ import domain.model.util.MathUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-// representerer en rute med et rutenummer og en liste av rutestopp, og status. beregner total distansen for ruten.
+/**
+ * Representerer en rute med et rutenummer og en liste over rutestopp.
+ *
+ * Inneholder også status for ruten (aktiv/inaktiv) og kan beregne total distanse.
+ *
+ * Funksjonalitet inkluderer:
+ * - Legge til stopp
+ * - Beregne navn basert på første og siste stopp
+ * - Beregne total distanse
+ * - Hente start- og endestopp
+ * - Sammenligning av ruter med equals/hashCode
+ */
 public class Route {
-    private int id;
-    private int routeNum;
-    private List<RouteStop> stops;
-    private boolean isActive = true;
 
-    // Constructors
-    // brukes for rute med eksisterende id
+    // --- Felt ---
+    private int id;                     // unik identifikator for ruten
+    private int routeNum;               // rutenummer
+    private List<RouteStop> stops;      // liste over stopp for ruten
+    private boolean isActive = true;    // status: aktiv eller ikke
+
+    // --- Konstruktører ---
+
+    /**
+     * Fullkonstruktør med ID for eksisterende rute.
+     * @param id unik identifikator
+     * @param routeNum rutenummer
+     */
     public Route(int id, int routeNum) {
         this.id = id;
         this.routeNum = routeNum;
         this.stops = new ArrayList<>();
     }
 
-    // brukes for ny rute med uten id
+    /**
+     * Konstruktør for ny rute uten ID.
+     * @param routeNum rutenummer
+     */
     public Route(int routeNum) {
         this.routeNum = routeNum;
         this.stops = new ArrayList<>();
     }
 
-    // brukes for rute med full informasjon, inkludert liste over rutestopp. setter stopp til tom liste hvis null.
+    /**
+     * Konstruktør med full informasjon, inkludert liste over stopp.
+     * Setter stopp til tom liste hvis null.
+     * @param id unik identifikator
+     * @param routeNum rutenummer
+     * @param stops liste over rutestopp
+     */
     public Route(int id, int routeNum, List<RouteStop> stops) {
         this.id = id;
         this.routeNum = routeNum;
         this.stops = stops != null ? stops : new ArrayList<>();
     }
 
-    // Methods
-    // legge til et nytt stoppested hvis den ikke allerede finnes
+    // --- Metoder ---
+
+    /**
+     * Legger til et nytt stoppested hvis det ikke allerede finnes.
+     * @param stop stoppsted som skal legges til
+     */
     public void addStop(RouteStop stop) {
         if (stop != null && !stops.contains(stop)) {
             stops.add(stop);
         }
     }
 
-    // generer et navn basert på første og siste stopp
+    /**
+     * Genererer rutenavn basert på første og siste stopp.
+     * Format: "rutenummer fra - til"
+     * @return rutenavn
+     * @throws IllegalStateException hvis ruta har mindre enn to stopp
+     */
     public String getName() {
         if (stops.size() < 2) {
             throw new IllegalStateException("Route must have at least two stops to generate a name.");
@@ -51,7 +87,11 @@ public class Route {
         return String.format("%d %s - %s", routeNum, from, to);
     }
 
-    // kalkulerer total distansen for ruten, og avrunder til 2 desimaler
+    /**
+     * Kalkulerer total distanse for ruten, og avrunder til 2 desimaler.
+     * Summerer alle distanser mellom hvert stopp.
+     * @return total distanse i km
+     */
     public double calculateTotalDistance() {
         if (stops.isEmpty()) {
             return 0.0;
@@ -63,71 +103,66 @@ public class Route {
         return MathUtil.round(total, 2);
     }
 
-    // Getters
-    public int getId() {
-        return id;
-    }
-
-    public int getRouteNum() {
-        return routeNum;
-    }
-
-    public List<RouteStop> getStops() {
-        return stops;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    // Setters
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setRouteNum(int routeNum) {
-        this.routeNum = routeNum;
-    }
-
-    // setter listen over stopp. setter til tom liste hvis null.
-    public void setStops(List<RouteStop> stops) {
-        this.stops = stops != null ? stops : new ArrayList<>();
-    }
-
-    public void setActive(boolean isActive) {
-        this.isActive = isActive;
-    }
-
-    // NYE (EMMA)
-    // Henter første stopp (startsted)
+    /**
+     * Henter første stopp (startsted).
+     * @return første RouteStop
+     * @throws IllegalStateException hvis ruta ikke har stopp
+     */
     public RouteStop getStartStop() {
-        // Sjekker først at lista over stopp ikke er tom eller null
-        // Hvis det ikke finnes noen stopp i ruta, får vi en feilmelding
         if (stops == null || stops.isEmpty()) {
             throw new IllegalStateException("Route has no stops");
         }
         return stops.get(0);
     }
 
-    // Henter siste stopp (sluttsted)
+    /**
+     * Henter siste stopp (sluttsted).
+     * @return siste RouteStop
+     * @throws IllegalStateException hvis ruta ikke har stopp
+     */
     public RouteStop getEndStop() {
-        // Sjekker at listen over stopp faktisk inneholder noe
         if (stops == null || stops.isEmpty()) {
             throw new IllegalStateException("Route has no stops");
         }
-        // returnerer siste stopp i ista. Dette gjøres ved å skrive -1.
         return stops.get(stops.size() - 1);
     }
 
+    // --- Getters ---
+    public int getId() { return id; }
+    public int getRouteNum() { return routeNum; }
+    public List<RouteStop> getStops() { return stops; }
+    public boolean isActive() { return isActive; }
 
-    // Overrides
-    // returnerer rutenavn + total distanse
+    // --- Setters ---
+    public void setId(int id) { this.id = id; }
+    public void setRouteNum(int routeNum) { this.routeNum = routeNum; }
+
+    /**
+     * Setter listen over stopp. Setter til tom liste hvis null.
+     * @param stops liste over RouteStop
+     */
+    public void setStops(List<RouteStop> stops) {
+        this.stops = stops != null ? stops : new ArrayList<>();
+    }
+
+    public void setActive(boolean isActive) { this.isActive = isActive; }
+
+    // --- Overrides ---
+
+    /**
+     * Returnerer rutenavn og total distanse.
+     * Eksempel: "12 Oslo - Bergen (456.78 km)"
+     */
     @Override
     public String toString() {
         return getName() + " (" + calculateTotalDistance() + " km)";
     }
 
-    // sammenligner ruter først på ID hvis begge har det, ellers på rutenummer og første/siste stopp
+    /**
+     * Sammenligner ruter:
+     * - Hvis begge har ID, sammenlignes ID
+     * - Ellers sammenlignes rutenummer og første/siste stopp
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -139,20 +174,21 @@ public class Route {
         }
 
         if (this.routeNum != other.routeNum) return false;
-        if (this.stops.size() < 2 || other.stops.size() < 2) {
-            return false;
-        }
+        if (this.stops.size() < 2 || other.stops.size() < 2) return false;
 
         var thisFrom = this.stops.get(0).getStop();
         var thisTo = this.stops.get(this.stops.size() - 1).getStop();
-
         var otherFrom = other.stops.get(0).getStop();
         var otherTo = other.stops.get(other.stops.size() - 1).getStop();
 
         return thisFrom.equals(otherFrom) && thisTo.equals(otherTo);
     }
 
-    // genererer hash kode basert på id hvis satt, ellers rutenummer + fra/til stopp
+    /**
+     * Genererer hashkode basert på:
+     * - ID hvis satt
+     * - Ellers rutenummer + første og siste stopp
+     */
     @Override
     public int hashCode() {
         if (id != 0) {
