@@ -44,4 +44,21 @@ public class ScheduleService {
 
         return new Schedule(route, date, frequencies, exceptions);
     }
+
+    public Schedule updateSchedule(int routeId, LocalDate date,
+                                   List<Frequency> updatedFrequencies,
+                                   List<ExceptionEntry> updatedExceptions) {
+        // Oppdater frekvenser
+        for (Frequency freq : updatedFrequencies) {
+            frequencyRepository.update(freq);
+        }
+
+        // Oppdater unntak
+        for (ExceptionEntry exception : updatedExceptions) {
+            exceptionRepository.update(exception);
+        }
+
+        // Bygg ny Schedule med oppdatert data
+        return buildSchedule(routeId, date);
+    }
 }
