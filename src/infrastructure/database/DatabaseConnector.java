@@ -1,6 +1,6 @@
 package database;
 
-import domain.model.util.Dotenv;
+import domain.model.util.DotenvUtil;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,7 +11,7 @@ public class DatabaseConnector {
 
     public static Connection connect() throws SQLException, IOException {
         // Opprett Dotenv-objekt og last inn .env-filen
-        Dotenv dotenv = new Dotenv(".env");
+        DotenvUtil dotenv = new DotenvUtil(".env");
 
         // Hent nødvendige konfigurasjoner fra miljøvariablene
         String dbHost = dotenv.get("DB_HOST");
