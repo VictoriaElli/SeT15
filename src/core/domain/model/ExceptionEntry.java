@@ -13,7 +13,6 @@ import java.time.LocalTime;
  * Valgfri melding (OperationMessage) kan legges til for å informere passasjerer.
  */
 public class ExceptionEntry {
-
     // --- Felt ---
     private int id;                       // unik identifikator for unntaket
     private Route route;                  // ruten unntaket gjelder

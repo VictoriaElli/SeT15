@@ -14,7 +14,6 @@ import domain.model.util.MathUtil;
  * - Sammenligne rutestopp
  */
 public class RouteStop {
-
     // --- Felt ---
     private int id;                     // unik identifikator for rutestoppet
     private Route route;                // ruten som stoppet tilhører

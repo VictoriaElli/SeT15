@@ -17,7 +17,6 @@ import java.util.List;
  * oppdage overlappende frekvenser og beregne total driftstid for dagen.
  */
 public class Frequency {
-
     // --- Felt ---
     private int id;                   // unik identifikator for frekvensen
     private Route route;              // ruten frekvensen gjelder

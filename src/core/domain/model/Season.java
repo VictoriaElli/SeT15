@@ -8,13 +8,12 @@ import java.util.Objects;
  * Eksempler på sesonger kan være "Vinter 2025", "Sommer 2024", osv.
  */
 public class Season {
-
-    // --- Felter ---
-    private int id;                     // Unik identifikator for sesongen
-    private String seasonType;          // Type sesong (f.eks. "Vinter", "Sommer")
-    private int year;                   // År for sesongen (f.eks. 2025)
-    private LocalDate startDate;        // Startdato for sesongen
-    private LocalDate endDate;          // Sluttdato for sesongen
+    // --- Felt ---
+    private int id;                     // unik identifikator for sesongen
+    private String seasonType;          // type sesong (f.eks. "Vinter", "Sommer")
+    private int year;                   // år for sesongen (f.eks. 2025)
+    private LocalDate startDate;        // startdato for sesongen
+    private LocalDate endDate;          // sluttdato for sesongen
 
     // --- Konstruktører ---
 

@@ -18,7 +18,6 @@ import java.util.List;
  * - Sammenligning av ruter med equals/hashCode
  */
 public class Route {
-
     // --- Felt ---
     private int id;                     // unik identifikator for ruten
     private int routeNum;               // rutenummer
