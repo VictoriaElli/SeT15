@@ -11,7 +11,7 @@ public class DatabaseConnector {
 
     public static Connection connect() throws SQLException, IOException {
         // Opprett Dotenv-objekt og last inn .env-filen
-        DotenvUtil dotenv = new DotenvUtil(".env");
+        DotenvUtil dotenv = new DotenvUtil("database.env");
 
         // Hent nødvendige konfigurasjoner fra miljøvariablene
         String dbHost = dotenv.get("DB_HOST");
@@ -20,16 +20,31 @@ public class DatabaseConnector {
         String dbUsername = dotenv.get("DB_USER");
         String dbPassword = dotenv.get("DB_PASSWORD");
 
+        // Logg miljøvariabler for debugging (skru av logging i produksjon for sensitiv informasjon)
+        System.out.println("Connecting to DB:");
+        System.out.println("Host: " + dbHost);
+        System.out.println("Port: " + dbPort);
+        System.out.println("Database: " + dbName);
+        System.out.println("Username: " + dbUsername);
+
         // Dynamisk bygg DB_URL
         String dbUrl = String.format("jdbc:mysql://%s:%s/%s", dbHost, dbPort, dbName);
 
-        // Opprett og returner databaseforbindelsen
-        return DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+        // Forsøk å opprette og returner databaseforbindelsen
+        try {
+            Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
+            System.out.println("Database connection successful!");
+            return connection;
+        } catch (SQLException e) {
+            System.err.println("Database connection failed: " + e.getMessage());
+            throw e;  // Kaster videre for at testene skal kunne fange opp feilen
+        }
     }
 
     public static void main(String[] args) {
         try (Connection connection = connect()) {
             if (connection != null) {
+                // Vist hvis tilkoblingen er vellykket
                 System.out.println("Database connection successful!");
             }
         } catch (SQLException | IOException e) {
