@@ -17,32 +17,62 @@
     </parent>
 
     <dependencies>
-        <!-- Sprint Boot -->
+        <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
 
-        <!-- JUnit 5 -->
+        <!-- JUnit 5 for testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.10.0</version>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
 
-        <!-- Mockito -->
+        <!-- Mockito for mocking in tests -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
-            <version>5.2.0</version>
+            <version>4.5.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>4.5.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- MySQL Connector -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+
+        <!-- Jackson for JSON binding -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.17.2</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- JUnit 5 runner -->
+            <!-- JUnit 5 Runner plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -53,7 +83,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Registrer deres kildekataloger -->
+            <!-- Build Helper Maven Plugin -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -62,7 +92,9 @@
                     <execution>
                         <id>add-source</id>
                         <phase>generate-sources</phase>
-                        <goals><goal>add-source</goal></goals>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
                         <configuration>
                             <sources>
                                 <source>src/api</source>
@@ -74,7 +106,9 @@
                     <execution>
                         <id>add-test-source</id>
                         <phase>generate-test-sources</phase>
-                        <goals><goal>add-test-source</goal></goals>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
                         <configuration>
                             <sources>
                                 <source>src/tests</source>
@@ -91,43 +125,4 @@
         <maven.compiler.target>23</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <dependencies>
-        <!-- For enhetstesting -->
-        <!-- JUnit 5 -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.10.2</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Mockito!-->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>5.10.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.10.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.17.2</version>
-        </dependency>
-    </dependencies>
 </project>
