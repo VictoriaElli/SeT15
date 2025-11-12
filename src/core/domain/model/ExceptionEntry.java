@@ -2,6 +2,7 @@ package domain.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 
 /**
  * Representerer et unntak fra den vanlige rutefrekvensen.
@@ -23,21 +24,89 @@ public class ExceptionEntry {
     private LocalTime departureTime;      // tidspunkt for unntaket
     private final ExceptionType type;     // type unntak (EXTRA, DELAYED, CANCELLED, OMITTED)
     private boolean isActive;             // om unntaket er aktivt
-    private final OperationMessage operationMessage; // valgfri melding til passasjerer
+    private OperationMessage operationMessage; // valgfri melding til passasjerer
 
-    // --- Fullkonstruktør ---
-    /**
-     * Fullkonstruktør som initialiserer alle felt.
-     * Validerer at enten validDate eller weekday er satt (ikke begge) og at departureTime er satt.
-     */
-    public ExceptionEntry(int id, Route route, Stop stop,
-                          LocalDate validDate, Weekday weekday,
-                          Season season, LocalTime departureTime,
-                          ExceptionType type, boolean isActive,
-                          OperationMessage operationMessage) {
-        if (type == null)
-            throw new IllegalArgumentException("ExceptionType cannot be null");
+    public static class Builder {
+        private int id;
+        private Route route;
+        private Stop stop = null;
+        private LocalDate validDate;
+        private Weekday weekday;
+        private Season season;
+        private LocalTime departureTime;
+        private ExceptionType type;
+        private boolean isActive = true;
+        private OperationMessage operationMessage = null;
 
+        public Builder setId(int id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder setRoute(Route route) {
+            this.route = route;
+            return this;
+        }
+
+        public Builder setStop(Stop stop) {
+            this.stop = stop;
+            return this;
+        }
+
+        public Builder setValidDate(LocalDate validDate) {
+            this.validDate = validDate;
+            return this;
+        }
+
+        public Builder setWeekday(Weekday weekday) {
+            this.weekday = weekday;
+            return this;
+        }
+
+        public Builder setSeason(Season season) {
+            this.season = season;
+            return this;
+        }
+
+        public Builder setDepartureTime(LocalTime departureTime) {
+            this.departureTime = departureTime;
+            return this;
+        }
+
+        public Builder setType(ExceptionType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder setIsActive(boolean isActive) {
+            this.isActive = isActive;
+            return this;
+        }
+
+        public Builder setOperationMessage(OperationMessage operationMessage) {
+            this.operationMessage = operationMessage;
+            return this;
+        }
+
+        public ExceptionEntry build() {
+            // Validere at vi har satt enten validDate eller weekday
+            if (validDate == null && weekday == null) {
+                throw new IllegalStateException("Either validDate or weekday must be set");
+            }
+
+            // Validere at det finnes et gyldig departureTime
+            if (departureTime == null) {
+                throw new IllegalStateException("Departure time must be set");
+            }
+
+            return new ExceptionEntry(id, route, stop, validDate, weekday, season, departureTime, type, isActive, operationMessage);
+        }
+    }
+
+    // --- Privat konstruktør ---
+    private ExceptionEntry(int id, Route route, Stop stop, LocalDate validDate, Weekday weekday,
+                           Season season, LocalTime departureTime, ExceptionType type,
+                           boolean isActive, OperationMessage operationMessage) {
         this.id = id;
         this.route = route;
         this.stop = stop;
@@ -48,72 +117,6 @@ public class ExceptionEntry {
         this.type = type;
         this.isActive = isActive;
         this.operationMessage = operationMessage;
-
-        validateDayDate(); // sikrer konsistens mellom dato/ukedag og tidspunkt
-    }
-
-    // --- Dato-baserte konstruktører ---
-    // Disse brukes når unntaket gjelder en spesifikk dato (validDate)
-    /** Med stopp og melding */
-    public ExceptionEntry(Route route, Stop stop, LocalDate validDate,
-                          Season season, LocalTime departureTime,
-                          ExceptionType type, OperationMessage operationMessage) {
-        // kaller fullkonstruktør med weekday = null, id = 0, isActive = true
-        this(0, route, stop, validDate, null, season, departureTime, type, true, operationMessage);
-    }
-
-    /** Med stopp, uten melding */
-    public ExceptionEntry(Route route, Stop stop, LocalDate validDate,
-                          Season season, LocalTime departureTime,
-                          ExceptionType type) {
-        // samme som over, men operationMessage = null
-        this(0, route, stop, validDate, null, season, departureTime, type, true, null);
-    }
-
-    /** Uten stopp, men med melding */
-    public ExceptionEntry(Route route, LocalDate validDate,
-                          Season season, LocalTime departureTime,
-                          ExceptionType type, OperationMessage operationMessage) {
-        // stopper = null betyr at unntaket gjelder alle stopp
-        this(0, route, null, validDate, null, season, departureTime, type, true, operationMessage);
-    }
-
-    /** Uten stopp og uten melding */
-    public ExceptionEntry(Route route, LocalDate validDate,
-                          Season season, LocalTime departureTime,
-                          ExceptionType type) {
-        this(0, route, null, validDate, null, season, departureTime, type, true, null);
-    }
-
-    // --- Ukedag-baserte konstruktører ---
-    // Disse brukes når unntaket gjelder en ukedag innenfor en sesong (weekday + season)
-    /** Med stopp og melding */
-    public ExceptionEntry(Route route, Stop stop, Weekday weekday,
-                          Season season, LocalTime departureTime,
-                          ExceptionType type, OperationMessage operationMessage) {
-        // validDate = null siden dette er ukedag-basert
-        this(0, route, stop, null, weekday, season, departureTime, type, true, operationMessage);
-    }
-
-    /** Med stopp, uten melding */
-    public ExceptionEntry(Route route, Stop stop, Weekday weekday,
-                          Season season, LocalTime departureTime,
-                          ExceptionType type) {
-        this(0, route, stop, null, weekday, season, departureTime, type, true, null);
-    }
-
-    /** Uten stopp, men med melding */
-    public ExceptionEntry(Route route, Weekday weekday,
-                          Season season, LocalTime departureTime,
-                          ExceptionType type, OperationMessage operationMessage) {
-        this(0, route, null, null, weekday, season, departureTime, type, true, operationMessage);
-    }
-
-    /** Uten stopp og uten melding */
-    public ExceptionEntry(Route route, Weekday weekday,
-                          Season season, LocalTime departureTime,
-                          ExceptionType type) {
-        this(0, route, null, null, weekday, season, departureTime, type, true, null);
     }
 
     // --- Validering ---
@@ -122,13 +125,13 @@ public class ExceptionEntry {
      */
     public void validateDayDate() {
         if (validDate != null && weekday != null) {
-            throw new IllegalStateException("Cannot have both validDate and weekday");
+            throw new IllegalStateException("Both validDate and weekday are set. Only one should be set.");
         }
         if (validDate == null && weekday == null) {
-            throw new IllegalStateException("Must have either validDate or weekday");
+            throw new IllegalStateException("Either validDate or weekday must be set, but not both.");
         }
         if (departureTime == null) {
-            throw new IllegalStateException("Departure time must be set");
+            throw new IllegalStateException("Departure time must be set.");
         }
     }
 
@@ -140,8 +143,8 @@ public class ExceptionEntry {
     public boolean appliesTo(LocalDate date) {
         if (!isActive) return false;
 
-        if (validDate != null) {
-            return validDate.equals(date);
+        if (validDate != null && validDate.equals(date)) {
+            return true;
         }
 
         if (weekday != null && season != null && season.isActiveOn(date)) {
@@ -201,25 +204,24 @@ public class ExceptionEntry {
     public void setSeason(Season season) { this.season = season; }
     public void setDepartureTime(LocalTime departureTime) { this.departureTime = departureTime; }
     public void setActive(boolean active) { isActive = active; }
+    public void setOperationMessage(OperationMessage operationMessage) { this.operationMessage = operationMessage; }
 
     // --- Overrides ---
     @Override
     public String toString() {
-        String dateInfo = validDate != null
-                ? "Date: " + validDate
-                : "Weekday: " + weekday;
+        String dateInfo = validDate != null ? "Date: " + validDate : "Weekday: " + weekday;
 
         return String.format(
                 "ExceptionEntry[id=%d, route=%s, stop=%s, %s, time=%s, type=%s, season=%s, active=%b, msg=%s]",
                 id,
-                route != null ? route.getRouteNum() : "null",
-                stop != null ? stop.getName() : "null",
+                Objects.toString(route, "null"),  // Bruker Objects.toString() for å håndtere null
+                Objects.toString(stop, "null"),  // Bruker Objects.toString() for å håndtere null
                 dateInfo,
-                departureTime != null ? departureTime.toString() : "null",
+                Objects.toString(departureTime, "null"),  // Bruker Objects.toString() for å håndtere null
                 type,
-                season != null ? season.getSeasonType() + " " + season.getYear() : "null",
+                Objects.toString(season != null ? season.getSeasonType() + " " + season.getYear() : null, "null"),
                 isActive,
-                operationMessage != null ? "\"" + operationMessage.getMessage() + "\"" : "null"
+                Objects.toString(operationMessage != null ? "\"" + operationMessage.getMessage() + "\"" : null, "null")
         );
     }
 }
