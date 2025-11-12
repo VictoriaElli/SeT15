@@ -3,71 +3,126 @@ package domain.model;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-// representerer et unntak fra den vanlige rutefrekvensen.
-// et unntak kan være knyttet til en spesifikk dato eller til en ukedag i en gitt sesong.
+/**
+ * Representerer et unntak fra den vanlige rutefrekvensen.
+ * Et unntak kan være knyttet til:
+ * - en spesifikk dato (validDate)
+ * - en ukedag innenfor en sesong (weekday + season)
+ *
+ * Unntak kan ha ulike typer (EXTRA, DELAYED, CANCELLED, OMITTED) og kan være aktivt eller ikke.
+ * Valgfri melding (OperationMessage) kan legges til for å informere passasjerer.
+ */
 public class ExceptionEntry {
-    private int id;
-    private Route route;
-    private Stop stop;
-    private LocalDate validDate;
-    private Weekday weekday;
-    private Season season;
-    private LocalTime departureTime;
-    private final ExceptionType type;
-    private boolean isActive;
-    private final OperationMessage operationMessage; // valgfritt
 
-    // Constructors
-    // brukes for unntak som gjelder én spesifikk dato
-    public ExceptionEntry(int id, Route route, Stop stop, LocalDate validDate, Season season,
-                          LocalTime departureTime, ExceptionType type, boolean isActive,
+    // --- Felt ---
+    private int id;                       // unik identifikator for unntaket
+    private Route route;                  // ruten unntaket gjelder
+    private Stop stop;                    // stoppet unntaket gjelder, null betyr alle stopp
+    private LocalDate validDate;          // spesifikk dato for unntaket
+    private Weekday weekday;              // ukedag for unntaket (alternativ til validDate)
+    private Season season;                // sesong unntaket gjelder, brukt sammen med weekday
+    private LocalTime departureTime;      // tidspunkt for unntaket
+    private final ExceptionType type;     // type unntak (EXTRA, DELAYED, CANCELLED, OMITTED)
+    private boolean isActive;             // om unntaket er aktivt
+    private final OperationMessage operationMessage; // valgfri melding til passasjerer
+
+    // --- Fullkonstruktør ---
+    /**
+     * Fullkonstruktør som initialiserer alle felt.
+     * Validerer at enten validDate eller weekday er satt (ikke begge) og at departureTime er satt.
+     */
+    public ExceptionEntry(int id, Route route, Stop stop,
+                          LocalDate validDate, Weekday weekday,
+                          Season season, LocalTime departureTime,
+                          ExceptionType type, boolean isActive,
                           OperationMessage operationMessage) {
+        if (type == null)
+            throw new IllegalArgumentException("ExceptionType cannot be null");
+
         this.id = id;
         this.route = route;
         this.stop = stop;
         this.validDate = validDate;
-        this.weekday = null;
-        this.season = season;
-        this.departureTime = departureTime;
-        this.type = type;
-        this.isActive = isActive;
-        this.operationMessage = operationMessage;
-        validateDayDate();
-    }
-
-    // brukes for unntak som gjelder én ukedag i en sesong
-    public ExceptionEntry(int id, Route route, Stop stop, Weekday weekday, Season season,
-                          LocalTime departureTime, ExceptionType type, boolean isActive,
-                          OperationMessage operationMessage) {
-        this.id = id;
-        this.route = route;
-        this.stop = stop;
-        this.validDate = null;
         this.weekday = weekday;
         this.season = season;
         this.departureTime = departureTime;
         this.type = type;
         this.isActive = isActive;
         this.operationMessage = operationMessage;
-        validateDayDate();
+
+        validateDayDate(); // sikrer konsistens mellom dato/ukedag og tidspunkt
     }
 
-    // brukes for nytt dato-basert unntak uten ID.
-    public ExceptionEntry(Route route, Stop stop, LocalDate validDate, Season season,
-                          LocalTime departureTime, ExceptionType type,
-                          OperationMessage operationMessage) {
-        this(0, route, stop, validDate, season, departureTime, type, true, operationMessage);
+    // --- Dato-baserte konstruktører ---
+    // Disse brukes når unntaket gjelder en spesifikk dato (validDate)
+
+    /** Med stopp og melding */
+    public ExceptionEntry(Route route, Stop stop, LocalDate validDate,
+                          Season season, LocalTime departureTime,
+                          ExceptionType type, OperationMessage operationMessage) {
+        // kaller fullkonstruktør med weekday = null, id = 0, isActive = true
+        this(0, route, stop, validDate, null, season, departureTime, type, true, operationMessage);
     }
 
-    // brukes for nytt ukedag-basert unntak uten ID.
-    public ExceptionEntry(Route route, Stop stop, Weekday weekday, Season season,
-                          LocalTime departureTime, ExceptionType type,
-                          OperationMessage operationMessage) {
-        this(0, route, stop, weekday, season, departureTime, type, true, operationMessage);
+    /** Med stopp, uten melding */
+    public ExceptionEntry(Route route, Stop stop, LocalDate validDate,
+                          Season season, LocalTime departureTime,
+                          ExceptionType type) {
+        // samme som over, men operationMessage = null
+        this(0, route, stop, validDate, null, season, departureTime, type, true, null);
     }
 
-    // Methods
-    // validering av dag/dato
+    /** Uten stopp, men med melding */
+    public ExceptionEntry(Route route, LocalDate validDate,
+                          Season season, LocalTime departureTime,
+                          ExceptionType type, OperationMessage operationMessage) {
+        // stopper = null betyr at unntaket gjelder alle stopp
+        this(0, route, null, validDate, null, season, departureTime, type, true, operationMessage);
+    }
+
+    /** Uten stopp og uten melding */
+    public ExceptionEntry(Route route, LocalDate validDate,
+                          Season season, LocalTime departureTime,
+                          ExceptionType type) {
+        this(0, route, null, validDate, null, season, departureTime, type, true, null);
+    }
+
+    // --- Ukedag-baserte konstruktører ---
+    // Disse brukes når unntaket gjelder en ukedag innenfor en sesong (weekday + season)
+
+    /** Med stopp og melding */
+    public ExceptionEntry(Route route, Stop stop, Weekday weekday,
+                          Season season, LocalTime departureTime,
+                          ExceptionType type, OperationMessage operationMessage) {
+        // validDate = null siden dette er ukedag-basert
+        this(0, route, stop, null, weekday, season, departureTime, type, true, operationMessage);
+    }
+
+    /** Med stopp, uten melding */
+    public ExceptionEntry(Route route, Stop stop, Weekday weekday,
+                          Season season, LocalTime departureTime,
+                          ExceptionType type) {
+        this(0, route, stop, null, weekday, season, departureTime, type, true, null);
+    }
+
+    /** Uten stopp, men med melding */
+    public ExceptionEntry(Route route, Weekday weekday,
+                          Season season, LocalTime departureTime,
+                          ExceptionType type, OperationMessage operationMessage) {
+        this(0, route, null, null, weekday, season, departureTime, type, true, operationMessage);
+    }
+
+    /** Uten stopp og uten melding */
+    public ExceptionEntry(Route route, Weekday weekday,
+                          Season season, LocalTime departureTime,
+                          ExceptionType type) {
+        this(0, route, null, null, weekday, season, departureTime, type, true, null);
+    }
+
+    // --- Validering ---
+    /**
+     * Validerer at unntaket har enten validDate eller weekday (men ikke begge) og at departureTime er satt.
+     */
     public void validateDayDate() {
         if (validDate != null && weekday != null) {
             throw new IllegalStateException("Cannot have both validDate and weekday");
@@ -80,8 +135,12 @@ public class ExceptionEntry {
         }
     }
 
+    // --- Metoder for å sjekke om unntaket gjelder en dato eller stopp ---
 
-    // sjekker om unntaket gjelder en gitt dato
+    /**
+     * Sjekker om unntaket gjelder for en gitt dato.
+     * Returnerer false hvis unntaket ikke er aktivt.
+     */
     public boolean appliesTo(LocalDate date) {
         if (!isActive) return false;
 
@@ -96,87 +155,38 @@ public class ExceptionEntry {
         return false;
     }
 
-    // sjekker om unntaket gjelder et spesifikt stopp
+    /**
+     * Sjekker om unntaket gjelder et spesifikt stopp.
+     * Returnerer true hvis stop er null (gjelder alle stopp) eller matcher checkStop.
+     */
     public boolean affectsStop(Stop checkStop) {
-        return stop != null && stop.equals(checkStop);
+        return stop == null || stop.equals(checkStop);
     }
 
-    // enklere sjekk for ekstra
-    public boolean isExtra() {
-        return type == ExceptionType.EXTRA;
-    }
+    // --- Enklere type-sjekk metoder ---
+    public boolean isExtra() { return type == ExceptionType.EXTRA; }
+    public boolean isDelayed() { return type == ExceptionType.DELAYED; }
+    public boolean isCancelled() { return type == ExceptionType.CANCELLED; }
+    public boolean isOmitted() { return type == ExceptionType.OMITTED; }
 
-    // enklere sjekk for forsinkelser
-    public boolean isDelayed() {
-        return type == ExceptionType.DELAYED;
-    }
+    // --- Getters ---
+    public int getId() { return id; }
+    public Route getRoute() { return route; }
+    public Stop getStop() { return stop; }
+    public LocalDate getValidDate() { return validDate; }
+    public Weekday getWeekday() { return weekday; }
+    public Season getSeason() { return season; }
+    public LocalTime getDepartureTime() { return departureTime; }
+    public ExceptionType getType() { return type; }
+    public boolean isActive() { return isActive; }
+    public OperationMessage getOperationMessage() { return operationMessage; }
 
-    // enklere sjekk for kanselleringer
-    public boolean isCancelled() {
-        return type == ExceptionType.CANCELLED;
-    }
+    // --- Setters ---
+    public void setId(int id) { this.id = id; }
+    public void setRoute(Route route) { this.route = route; }
+    public void setStop(Stop stop) { this.stop = stop; }
 
-    // enklere sjekk for utelatelser
-    public boolean isOmitted() {
-        return type == ExceptionType.OMITTED;
-    }
-
-
-    // Getters
-    public int getId() {
-        return id;
-    }
-
-    public Route getRoute() {
-        return route;
-    }
-
-    public Stop getStop() {
-        return stop;
-    }
-
-    public LocalDate getValidDate() {
-        return validDate;
-    }
-
-    public Weekday getWeekday() {
-        return weekday;
-    }
-
-    public Season getSeason() {
-        return season;
-    }
-
-    public LocalTime getDepartureTime() {
-        return departureTime;
-    }
-
-    public ExceptionType getType() {
-        return type;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public OperationMessage getOperationMessage() {
-        return operationMessage;
-    }
-
-    // Setters
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setRoute(Route route) {
-        this.route = route;
-    }
-
-    public void setStop(Stop stop) {
-        this.stop = stop;
-    }
-
-    // setter en dato for unntaket. kan ikke kombineres med ukedag.
+    /** Setter validDate. Kan ikke kombineres med ukedag. */
     public void setValidDate(LocalDate validDate) {
         if (validDate != null && this.weekday != null) {
             throw new IllegalStateException("Cannot set validDate when weekday is already set");
@@ -184,7 +194,7 @@ public class ExceptionEntry {
         this.validDate = validDate;
     }
 
-    // setter en ukedag for unntaket. kan ikke kombineres med dato.
+    /** Setter ukedag. Kan ikke kombineres med dato. */
     public void setWeekday(Weekday weekday) {
         if (weekday != null && this.validDate != null) {
             throw new IllegalStateException("Cannot set weekday when validDate is already set");
@@ -192,19 +202,11 @@ public class ExceptionEntry {
         this.weekday = weekday;
     }
 
-    public void setSeason(Season season) {
-        this.season = season;
-    }
+    public void setSeason(Season season) { this.season = season; }
+    public void setDepartureTime(LocalTime departureTime) { this.departureTime = departureTime; }
+    public void setActive(boolean active) { isActive = active; }
 
-    public void setDepartureTime(LocalTime departureTime) {
-        this.departureTime = departureTime;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    // Override
+    // --- toString override ---
     @Override
     public String toString() {
         String dateInfo = validDate != null
@@ -224,5 +226,4 @@ public class ExceptionEntry {
                 operationMessage != null ? "\"" + operationMessage.getMessage() + "\"" : "null"
         );
     }
-
 }
