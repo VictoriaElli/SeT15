@@ -62,6 +62,19 @@ public class RouteStop {
         validateRouteStop();  // validerer at stoppet er logisk
     }
 
+    // --- Validering ---
+    /**
+     * Validerer at dataene for rutestoppet er logiske:
+     * - routeOrder >= 1
+     * - timeFromStart >= 0
+     * - distanceFromPrevious >= 0
+     */
+    private void validateRouteStop() {
+        if (routeOrder < 1) throw new IllegalArgumentException("routeOrder must be >= 1");
+        if (timeFromStart < 0) throw new IllegalArgumentException("timeFromStart must be >= 0");
+        if (distanceFromPrevious < 0) throw new IllegalArgumentException("distanceFromPrevious must be >= 0");
+    }
+
     // --- Getters ---
     public Route getRoute() { return route; }
     public Stop getStop() { return stop; }
@@ -101,22 +114,7 @@ public class RouteStop {
         validateRouteStop();  // validerer at avstanden er korrekt
     }
 
-    // --- Validering ---
-
-    /**
-     * Validerer at dataene for rutestoppet er logiske:
-     * - routeOrder >= 1
-     * - timeFromStart >= 0
-     * - distanceFromPrevious >= 0
-     */
-    private void validateRouteStop() {
-        if (routeOrder < 1) throw new IllegalArgumentException("routeOrder must be >= 1");
-        if (timeFromStart < 0) throw new IllegalArgumentException("timeFromStart must be >= 0");
-        if (distanceFromPrevious < 0) throw new IllegalArgumentException("distanceFromPrevious must be >= 0");
-    }
-
     // --- Overrides ---
-
     /**
      * Returnerer en lettleselig beskrivelse av rutestoppet i formatet:
      * "Route {rutenummer} – Stop {stoppnavn} – #{rekkefølge} – +{tid} min – +{avstand} km"

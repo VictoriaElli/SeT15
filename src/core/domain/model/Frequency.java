@@ -51,7 +51,6 @@ public class Frequency {
     }
 
     // --- Metoder ---
-
     /**
      * Genererer en liste over alle avgangstidspunkter for denne frekvensen.
      * Returnerer tom liste hvis start/slutt eller intervall er ugyldig.
@@ -133,6 +132,7 @@ public class Frequency {
         this.intervalMinutes = intervalMinutes;
     }
 
+    // --- Overrides ---
     /**
      * Returnerer en lesbar beskrivelse av frekvensen.
      */

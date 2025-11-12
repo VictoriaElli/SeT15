@@ -28,7 +28,6 @@ public class Schedule {
     private final List<ExceptionEntry> exceptions; // liste over unntak som kan påvirke avganger
 
     // --- Konstruktører ---
-
     /**
      * Konstruktør som oppretter en tidsplan for en gitt rute og dato,
      * og setter opp lister for frekvenser og unntak.
@@ -55,7 +54,6 @@ public class Schedule {
     }
 
     // --- Metoder ---
-
     /**
      * Henter alle avganger for ruten på den spesifiserte datoen.
      * Denne metoden returnerer avganger uavhengig av stopp.
@@ -112,7 +110,6 @@ public class Schedule {
         }
 
         // --- Håndtering av unntak ---
-
         // Håndterer eventuelle unntak for forsinkelser, ekstra avganger eller kanselleringer
         for (ExceptionEntry entry : exceptions) {
             // Sjekker om unntaket er aktivt, gjelder for den rette ruten og datoen
@@ -144,7 +141,6 @@ public class Schedule {
     }
 
     // --- Gettere ---
-
     /**
      * Henter ruten som denne tidsplanen gjelder for.
      *

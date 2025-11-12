@@ -8,7 +8,6 @@ import java.math.RoundingMode;
  * Bruker BigDecimal for presis avrunding og gir mulighet for å angi antall desimaler.
  */
 public class MathUtil {
-
     /**
      * Avrunder en verdi til et spesifisert antall desimaler.
      *

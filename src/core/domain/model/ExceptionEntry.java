@@ -54,7 +54,6 @@ public class ExceptionEntry {
 
     // --- Dato-baserte konstruktører ---
     // Disse brukes når unntaket gjelder en spesifikk dato (validDate)
-
     /** Med stopp og melding */
     public ExceptionEntry(Route route, Stop stop, LocalDate validDate,
                           Season season, LocalTime departureTime,
@@ -88,7 +87,6 @@ public class ExceptionEntry {
 
     // --- Ukedag-baserte konstruktører ---
     // Disse brukes når unntaket gjelder en ukedag innenfor en sesong (weekday + season)
-
     /** Med stopp og melding */
     public ExceptionEntry(Route route, Stop stop, Weekday weekday,
                           Season season, LocalTime departureTime,
@@ -135,7 +133,6 @@ public class ExceptionEntry {
     }
 
     // --- Metoder for å sjekke om unntaket gjelder en dato eller stopp ---
-
     /**
      * Sjekker om unntaket gjelder for en gitt dato.
      * Returnerer false hvis unntaket ikke er aktivt.
@@ -205,7 +202,7 @@ public class ExceptionEntry {
     public void setDepartureTime(LocalTime departureTime) { this.departureTime = departureTime; }
     public void setActive(boolean active) { isActive = active; }
 
-    // --- toString override ---
+    // --- Overrides ---
     @Override
     public String toString() {
         String dateInfo = validDate != null

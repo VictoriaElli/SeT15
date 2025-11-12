@@ -15,7 +15,6 @@ public class Stop {
     private boolean isActive = true;  // angir om stoppestedet er aktivt eller inaktivt, standard er aktivt
 
     // --- Konstruktører ---
-
     /**
      * Konstruktør som brukes når stoppestedet allerede finnes i systemet (med ID).
      *
@@ -65,8 +64,29 @@ public class Stop {
         this(name, 0, 0);  // Setter standardverdier for bredde- og lengdegrad
     }
 
-    // --- Getters ---
+    // --- Validering ---
+    /**
+     * Validerer stoppestedet for å sikre at dataene er logiske før de lagres.
+     * Dette inkluderer å sjekke at navn ikke er tomt, og at koordinatene er innenfor gyldige grenser.
+     */
+    private void validateStop() {
+        // Sjekker at stoppestedet har et gyldig navn.
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Stop name cannot be empty");
+        }
 
+        // Sjekker at breddegraden er mellom -90 og 90.
+        if (latitude < -90 || latitude > 90) {
+            throw new IllegalArgumentException("Latitude must be between -90 and 90");
+        }
+
+        // Sjekker at lengdegraden er mellom -180 og 180.
+        if (longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("Longitude must be between -180 and 180");
+        }
+    }
+
+    // --- Getters ---
     /**
      * Henter ID for stoppestedet.
      *
@@ -113,7 +133,6 @@ public class Stop {
     }
 
     // --- Setters ---
-
     /**
      * Setter ID for stoppestedet.
      *
@@ -162,31 +181,8 @@ public class Stop {
         isActive = active;
     }
 
-    // --- Validering ---
-
-    /**
-     * Validerer stoppestedet for å sikre at dataene er logiske før de lagres.
-     * Dette inkluderer å sjekke at navn ikke er tomt, og at koordinatene er innenfor gyldige grenser.
-     */
-    private void validateStop() {
-        // Sjekker at stoppestedet har et gyldig navn.
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Stop name cannot be empty");
-        }
-
-        // Sjekker at breddegraden er mellom -90 og 90.
-        if (latitude < -90 || latitude > 90) {
-            throw new IllegalArgumentException("Latitude must be between -90 and 90");
-        }
-
-        // Sjekker at lengdegraden er mellom -180 og 180.
-        if (longitude < -180 || longitude > 180) {
-            throw new IllegalArgumentException("Longitude must be between -180 and 180");
-        }
-    }
 
     // --- Overrides ---
-
     /**
      * Returnerer en lettleselig representasjon av stoppestedet som kan brukes til utskrift.
      * Formatet er: "Navn (breddegrad, lengdegrad)".

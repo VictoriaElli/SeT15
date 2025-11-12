@@ -16,7 +16,6 @@ public class Season {
     private LocalDate endDate;          // sluttdato for sesongen
 
     // --- Konstruktører ---
-
     /**
      * Konstruktør som brukes når sesongen allerede finnes i systemet (med ID).
      *
@@ -50,7 +49,6 @@ public class Season {
     }
 
     // --- Metoder ---
-
     /**
      * Sjekker om en gitt dato faller innenfor sesongen.
      *
@@ -87,7 +85,6 @@ public class Season {
     }
 
     // --- Validering ---
-
     /**
      * Validerer at startdatoen tilhører samme år som "year"-feltet,
      * og at startdatoen er før eller lik sluttdatoen.
@@ -105,7 +102,6 @@ public class Season {
     }
 
     // --- Getters ---
-
     public int getId() {
         return id;
     }
@@ -127,7 +123,6 @@ public class Season {
     }
 
     // --- Setters ---
-
     /**
      * Setter ID for sesongen.
      *
@@ -180,7 +175,6 @@ public class Season {
     }
 
     // --- Overrides ---
-
     /**
      * Returnerer en lettleselig representasjon av sesongen som kan brukes til logging og visning.
      * Format: "Season[id={id}, {seasonType} {year}, {startDate} - {endDate}]"

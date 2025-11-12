@@ -25,7 +25,6 @@ public class Route {
     private boolean isActive = true;    // status: aktiv eller ikke
 
     // --- Konstruktører ---
-
     /**
      * Fullkonstruktør med ID for eksisterende rute.
      * @param id unik identifikator
@@ -60,7 +59,6 @@ public class Route {
     }
 
     // --- Metoder ---
-
     /**
      * Legger til et nytt stoppested hvis det ikke allerede finnes.
      * @param stop stoppsted som skal legges til
@@ -147,7 +145,6 @@ public class Route {
     public void setActive(boolean isActive) { this.isActive = isActive; }
 
     // --- Overrides ---
-
     /**
      * Returnerer rutenavn og total distanse.
      * Eksempel: "12 Oslo - Bergen (456.78 km)"
