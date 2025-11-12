@@ -48,17 +48,27 @@ public class ScheduleService {
     public Schedule updateSchedule(int routeId, LocalDate date,
                                    List<Frequency> updatedFrequencies,
                                    List<ExceptionEntry> updatedExceptions) {
-        // Oppdater frekvenser
+        Route route = routeRepository.read(routeId);
+        if (route == null) {
+            throw new IllegalArgumentException("Route not found for ID: " + routeId);
+        }
+
+        // Valider frekvenser
         for (Frequency freq : updatedFrequencies) {
+            if (freq.getRoute() == null || freq.getRoute().getId() != routeId) {
+                throw new IllegalArgumentException("Frequency does not belong to route " + routeId);
+            }
             frequencyRepository.update(freq);
         }
 
-        // Oppdater unntak
+        // Valider exceptions
         for (ExceptionEntry exception : updatedExceptions) {
+            if (exception.getRoute() == null || exception.getRoute().getId() != routeId) {
+                throw new IllegalArgumentException("Exception does not belong to route " + routeId);
+            }
             exceptionRepository.update(exception);
         }
 
-        // Bygg ny Schedule med oppdatert data
         return buildSchedule(routeId, date);
     }
 }
