@@ -6,11 +6,17 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Dotenv {
+public class DotenvUtil {
 
     private Map<String, String> envVariables;
 
-    public Dotenv(String filePath) throws IOException {
+    // Standard filbane kan være .env i rotkatalogen
+    public DotenvUtil() throws IOException {
+        this(".env"); // Bruk standard bane for .env-filen
+    }
+
+    // Konstruktør med valgfri filbane
+    public DotenvUtil(String filePath) throws IOException {
         envVariables = new HashMap<>();
         load(filePath);
     }
@@ -29,7 +35,22 @@ public class Dotenv {
 
     // Hente en verdi fra .env-fil
     public String get(String key) {
-        return envVariables.get(key); // Returner verdien for nøkkelen
+        if (envVariables.containsKey(key)) {
+            return envVariables.get(key); // Returner verdien for nøkkelen
+        }
+        return null; // Returner null hvis nøkkelen ikke finnes
+    }
+
+    // For å gjøre det enklere å hente spesifikke miljøvariabler
+    public String getDatabaseUrl() {
+        return get("DB_URL");
+    }
+
+    public String getDatabaseUsername() {
+        return get("DB_USER");
+    }
+
+    public String getDatabasePassword() {
+        return get("DB_PASSWORD");
     }
 }
-
