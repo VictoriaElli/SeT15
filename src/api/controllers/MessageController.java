@@ -2,6 +2,7 @@ package controllers;
 
 import domain.model.*;
 import domain.service.OperationMessageService;
+import domain.service.RouteService;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -16,10 +17,12 @@ import dto.MessageResponse;
 public class MessageController {
 
     private final OperationMessageService messageService;
+    private final RouteService routeService;
 
     // Dette er konstruktøren som gjør klar service slik at controlleren kan bruke den
-    public MessageController(OperationMessageService messageService) {
+    public MessageController(OperationMessageService messageService, RouteService routeService) {
         this.messageService = messageService;
+        this.routeService = routeService;
     }
 
     @PostMapping
@@ -69,6 +72,12 @@ public class MessageController {
         // Dette sjekker at ruteId er gyldig
         if (req.routeId <= 0) {
             return MessageResponse.fail("Ugyldig ruteId");
+        }
+
+        // Dette er for å sjekk at ruten faktisk finnes
+        Route route = routeService.getRoute(req.routeId);
+        if (route == null) {
+            return MessageResponse.fail("Rute finnes ikke");
         }
 
         // Dette sjekker at startdato er satt
