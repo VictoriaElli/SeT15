@@ -1,27 +1,26 @@
 package database;
 
 import domain.model.util.DotenvUtil;
-
+import exception.MySQLDatabaseException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.io.IOException;
 
 public class DatabaseConnector {
 
-    // Metode for å etablere en tilkobling til databasen
-    public static Connection connect() throws SQLException, IOException {
+    // Metode for å etablere en tilkobling til databasen ved å bruke MySQLDatabase
+    public static Connection connect() throws SQLException, IOException, MySQLDatabaseException {
         // Opprett Dotenv-objekt og last inn .env-filen for å hente miljøvariabler
         DotenvUtil dotenv = new DotenvUtil("database.env");
 
         // Hent nødvendige konfigurasjoner fra miljøvariablene (fra .env-filen)
-        String dbHost = dotenv.get("DB_HOST"); // Hent verten for databasen
-        String dbPort = dotenv.get("DB_PORT"); // Hent porten for databasen
-        String dbName = dotenv.get("DB_NAME"); // Hent databasenavnet
-        String dbUsername = dotenv.get("DB_USER"); // Hent brukernavnet for databasen
-        String dbPassword = dotenv.get("DB_PASSWORD"); // Hent passordet for databasen
+        String dbHost = dotenv.get("DB_HOST");
+        String dbPort = dotenv.get("DB_PORT");
+        String dbName = dotenv.get("DB_NAME");
+        String dbUsername = dotenv.get("DB_USER");
+        String dbPassword = dotenv.get("DB_PASSWORD");
 
-        // Logg miljøvariabler for debugging. Husk å fjerne logging i produksjon for å unngå lekkasje av sensitiv informasjon
+        // Logg miljøvariabler for debugging (huske å fjerne i produksjon for å unngå lekkasje av sensitive data)
         System.out.println("Connecting to DB:");
         System.out.println("Host: " + dbHost);
         System.out.println("Port: " + dbPort);
@@ -31,15 +30,9 @@ public class DatabaseConnector {
         // Bygg database-URL dynamisk basert på de hentede miljøvariablene
         String dbUrl = String.format("jdbc:mysql://%s:%s/%s", dbHost, dbPort, dbName);
 
-        // Forsøk å opprette en tilkobling til databasen og returner forbindelsen
-        try {
-            Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
-            System.out.println("Database connection successful!"); // Bekreft at tilkoblingen er vellykket
-            return connection;
-        } catch (SQLException e) {
-            System.err.println("Database connection failed: " + e.getMessage()); // Feilhåndtering ved tilkoblingsfeil
-            throw e;  // Kast unntaket videre slik at det kan fanges opp i testene
-        }
+        // Opprett MySQLDatabase-objekt og start tilkoblingen
+        MySQLDatabase mysqlDatabase = new MySQLDatabase(dbUrl, dbUsername, dbPassword);
+        return mysqlDatabase.startDB();  // Kall startDB() for å opprette og returnere en tilkobling
     }
 
     // Main-metode for å teste tilkoblingen
@@ -50,8 +43,8 @@ public class DatabaseConnector {
                 // Hvis tilkoblingen er vellykket, vis melding i konsollen
                 System.out.println("Database connection successful!");
             }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace(); // Skriv ut feil dersom tilkoblingen mislykkes
+        } catch (SQLException | IOException | MySQLDatabaseException e) {
+            e.printStackTrace();  // Skriv ut feil dersom tilkoblingen mislykkes
         }
     }
 }
