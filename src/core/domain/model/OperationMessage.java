@@ -41,6 +41,17 @@ public class OperationMessage {
         this.isActive = isActive;
     }
 
+    // En konstruktør som brukes av controlleren når den kun har routeId og ikke full datoinformasjon
+    public OperationMessage(String message, boolean isActive, int routeId) {
+        this.id = 0;
+        setMessage(message);
+        this.isActive = isActive;
+        this.published = LocalDateTime.now();
+        this.route = new Route(routeId);
+        this.validFrom = LocalDateTime.now();
+        this.validTo = this.validFrom;
+    }
+
     // Getters
     public int getId() {
         return id;
