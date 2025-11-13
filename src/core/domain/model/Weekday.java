@@ -1,6 +1,7 @@
 package domain.model;
 
 import java.time.LocalDate;
+import java.time.DayOfWeek;
 
 public enum Weekday {
     MONDAY,
@@ -11,8 +12,12 @@ public enum Weekday {
     SATURDAY,
     SUNDAY;
 
+    // Utility method to convert LocalDate to Weekday
     public static Weekday fromLocalDate(LocalDate date) {
-        switch (date.getDayOfWeek()) {
+        // Get the DayOfWeek enum from LocalDate and map it to the Weekday enum.
+        DayOfWeek dayOfWeek = date.getDayOfWeek();
+
+        switch (dayOfWeek) {
             case MONDAY: return MONDAY;
             case TUESDAY: return TUESDAY;
             case WEDNESDAY: return WEDNESDAY;
@@ -20,8 +25,7 @@ public enum Weekday {
             case FRIDAY: return FRIDAY;
             case SATURDAY: return SATURDAY;
             case SUNDAY: return SUNDAY;
-            default: throw new IllegalArgumentException("Unknown day: " + date.getDayOfWeek());
+            default: throw new IllegalArgumentException("Unknown day: " + dayOfWeek);
         }
     }
 }
-
