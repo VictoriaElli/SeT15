@@ -1,6 +1,8 @@
 package controllers;
 
 import domain.model.*;
+import domain.model.OperationMessage;
+import domain.model.Route;
 import domain.service.OperationMessageService;
 import domain.service.RouteService;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,8 @@ import dto.MessageResponse;
 @RestController
 @RequestMapping("/api/messages")
 public class MessageController {
+    // For max lengde på tekst
+    private static final int MAX_MESSAGE_LENGTH = 500;
 
     private final OperationMessageService messageService;
     private final RouteService routeService;
@@ -67,6 +71,11 @@ public class MessageController {
         // Dette sjekker om tekstfeltet er tomt
         if (req.message == null || req.message.isBlank()) {
             return MessageResponse.fail("Tekst kan ikke være tom");
+        }
+
+        // Dette er for å sjekk maksimal tekstlengde
+        if (req.message.length() > MAX_MESSAGE_LENGTH) {
+            return MessageResponse.fail("Tekst kan ikke være lengre enn " + MAX_MESSAGE_LENGTH + " tegn");
         }
 
         // Dette sjekker at ruteId er gyldig
