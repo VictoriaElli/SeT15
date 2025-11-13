@@ -9,7 +9,7 @@ import java.sql.Types;
 
 // Dette er et repository som lagrer driftsmeldinger i databasen
 // Klassen bruker DatabaseConnector som skal koble seg på databasen
-public class OperationMessageRepository {
+public class MySqlOperationMessageRepository {
 
     // Dette er for å lagre en ny driftsmelding i databasen
     public void create(OperationMessage msg) {
