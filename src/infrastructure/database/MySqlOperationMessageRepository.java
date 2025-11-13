@@ -55,6 +55,7 @@ public class MySqlOperationMessageRepository {
 
         } catch (Exception e) {
             System.out.println("FEIL: Klarte ikke å lagre driftsmelding (" + e.getMessage() + ")");
+            throw new RuntimeException("Databasefeil ved lagring av melding");
         }
     }
 }
