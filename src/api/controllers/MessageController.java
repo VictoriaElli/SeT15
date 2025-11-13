@@ -4,6 +4,8 @@ import domain.model.*;
 import domain.service.OperationMessageService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import dto.MessageRequest;
@@ -82,9 +84,17 @@ public class MessageController {
         }
 
         try {
-            // Dette er for å opprette en ny driftsmelding
-            OperationMessage msg = new OperationMessage(req.message, req.isActive, req.routeId);
+            // Dette lager startdato for driftsmeldingen
+            LocalDateTime from = LocalDate.parse(req.validFrom).atStartOfDay();
 
+            // Dette lager sluttdato hvis den finnes
+            LocalDateTime to = null;
+            if (req.validTo != null && !req.validTo.isBlank()) {
+                to = LocalDate.parse(req.validTo).atTime(23, 59);
+            }
+
+            // Dette er for å opprette en ny driftsmelding
+            OperationMessage msg = new OperationMessage(req.message, req.isActive, new Route(req.routeId), from, to);
 
             // Dette er for å lagre driftsmeldingen i databasen
             messageService.addMessage(msg);
@@ -100,4 +110,3 @@ public class MessageController {
         }
     }
 }
-
