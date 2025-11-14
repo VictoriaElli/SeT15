@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Byferga</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script defer src="js/data.js"></script>
+    <script defer src="js/EditSave.js"></script>
+    <script defer src="js/feedback.js"></script>
+    <script defer src="js/filterAndDisplay.js"></script>
+    <script defer src="js/filterWeekday.js"></script>
+
+</head>
+
+<body>
+
+<header>
+    <h1>Admin: Rediger fergetider</h1>
+</header>
+
+<main>
+
+<section>
+    <h2>Legg til eller endre avgang</h2>
+
+    <form id="avdeling1">
+        <label for="route">Rute</label>
+        <select id="route" required>
+            <option value="">Velg rute</option>
+            <option value="1">805: Gamlebyen to Ålekilen</option>
+            <option value="2">805: Ålekilen to Gamlebyen</option>
+            <option value="3">803: Cicignon to Gamlebyen</option>
+            <option value="4">803: Gamlebyen to Cicignon</option>
+            <option value="5">804: Lisleby to Sellebakk</option>
+            <option value="6">804: Sellebakk to Lisleby</option>
+        </select>
+
+        <label for="weekday">Ukedag</label>
+        <select id="weekday" required>
+            <option value="">Velg dag</option>
+            <option value="MONDAY">Mandag</option>
+            <option value="TUESDAY">Tirsdag</option>
+            <option value="WEDNESDAY">Onsdag</option>
+            <option value="THURSDAY">Torsdag</option>
+            <option value="FRIDAY">Fredag</option>
+            <option value="SATURDAY">Lørdag</option>
+            <option value="SUNDAY">Søndag</option>
+        </select>
+
+        <label for="departureTime">Avgangstid</label>
+        <input type="time" id="departureTime" required>
+
+        <label for="type">Type</label>
+        <select id="type" required>
+            <option value="NORMAL">Normal (fra frekvens)</option>
+            <option value="EXTRA">Ekstra avgang</option>
+            <option value="OMITTED">Utelatt</option>
+            <option value="CANCELLED">Kansellert</option>
+        </select>
+
+        <label for="season">Sesong</label>
+        <select id="season" required>
+            <option value="1">Sommer 2025</option>
+            <option value="2" selected>Vinter 2025</option>
+            <option value="3">Sommer 2026</option>
+            <option value="4">Vinter 2026</option>
+        </select>
+
+        <button type="submit" id="submitBtn">Lagre avgang</button>
+    </form>
+
+    <output id="feedback"></output>
+</section>
+
+
+<section>
+    <h2>Vis fergetider</h2>
+
+    <form id="avdeling2">
+
+        <label for="filterRoute">Rute</label>
+        <select id="filterRoute" required>
+            <option value="">Velg rute</option>
+            <option value="1">805: Gamlebyen to Ålekilen</option>
+            <option value="2">805: Ålekilen to Gamlebyen</option>
+            <option value="3">803: Cicignon to Gamlebyen</option>
+            <option value="4">803: Gamlebyen to Cicignon</option>
+            <option value="5">804: Lisleby to Sellebakk</option>
+            <option value="6">804: Sellebakk to Lisleby</option>
+        </select>
+
+        <label for="filterWeekday">Ukedag</label>
+        <select id="filterWeekday">
+            <option value="">Velg dag</option>
+            <option value="MONDAY">Mandag</option>
+            <option value="TUESDAY">Tirsdag</option>
+            <option value="WEDNESDAY">Onsdag</option>
+            <option value="THURSDAY">Torsdag</option>
+            <option value="FRIDAY">Fredag</option>
+            <option value="SATURDAY">Lørdag</option>
+            <option value="SUNDAY">Søndag</option>
+        </select>
+
+        <label for="filterTime">Fra og med avgang</label>
+        <input type="time" id="filterTime" required>
+
+        <button type="submit">Vis avganger</button>
+    </form>
+
+    <section id="routeResult"></section>
+</section>
+
+</main>
+
+</body>
+</html>
