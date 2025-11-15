@@ -15,6 +15,9 @@ public class OperationMessage {
     private LocalDateTime validFrom;
     private LocalDateTime validTo;
 
+    // For hvem som opprettet meldingen
+    private String createdBy;
+
     // formaterer dato og tid på ønsket måte
     private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -81,6 +84,10 @@ public class OperationMessage {
         return validTo;
     }
 
+    // For å hente brukeren som opprettet meldingen
+    public String getCreatedBy() {
+        return createdBy;
+    }
 
     // Setters
     public void setId(int id) {
@@ -131,6 +138,12 @@ public class OperationMessage {
             this.validTo = validTo;
         }
     }
+
+    // Setter for brukeren som opprettet meldingen
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
 
     // Overrides
     // returnerer en lesbar streng med relevant informasjon.
