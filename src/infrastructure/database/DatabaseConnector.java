@@ -61,7 +61,7 @@ public class DatabaseConnector {
         }
 
         // Les fra databasen
-        readData("SELECT * FROM stops"); // Bytt 'route' med ønsket tabell
+        readData("SELECT * FROM stops"); // Bytt 'stops' med ønsket tabell
 
 
     }

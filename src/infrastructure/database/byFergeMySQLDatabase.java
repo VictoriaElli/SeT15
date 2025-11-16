@@ -1,4 +1,4 @@
-package org.byferge.infrastructure.database;
+package database;
 
 
 // Tilknyttning til databasen
