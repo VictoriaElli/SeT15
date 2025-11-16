@@ -10,7 +10,7 @@ public class DotenvUtilTest {
     @Test
     public void testDotenvUtil() throws Exception {
         // Opprett en instans av DotenvUtil som peker til "database.env"-filen.
-        DotenvUtil dotenv = new DotenvUtil("database.env");
+        DotenvUtil dotenv = new DotenvUtil("src/resources/database.env");
 
         // Hent database-tilkoblingsdetaljer ved hjelp av DotenvUtil sine metoder.
         String dbUrl = dotenv.getDatabaseUrl();  // Hent database-URL

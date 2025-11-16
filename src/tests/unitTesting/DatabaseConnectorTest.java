@@ -20,7 +20,7 @@ public class DatabaseConnectorTest {
     public void setUp() {
         try {
             // Last inn miljøvariabler fra .env-filen ved hjelp av DotenvUtil
-            DotenvUtil dotenv = new DotenvUtil("database.env");
+            DotenvUtil dotenv = new DotenvUtil("src/resources/database.env");
 
             // Sette nødvendige miljøvariabler for testen
             System.setProperty("DB_HOST", dotenv.get("DB_HOST"));
