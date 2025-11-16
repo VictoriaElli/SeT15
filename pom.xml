@@ -101,6 +101,7 @@
                         <configuration>
                             <sources>
                                 <source>src/api</source>
+                                <source>src/application</source>
                                 <source>src/core</source>
                                 <source>src/infrastructure</source>
                             </sources>
