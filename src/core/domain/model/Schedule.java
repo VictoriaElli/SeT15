@@ -8,45 +8,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Representerer alle avganger for en rute på en gitt dato.
- *
- * Inneholder informasjon om:
- * - Ruten (Route)
- * - Datoen for tidsplanen (LocalDate)
- * - Frekvenser som bestemmer avgangstidene (Frequency)
- * - Eventuelle unntak (ExceptionEntry) som kan påvirke avganger
- *
- * Funksjonalitet inkluderer:
- * - Hente avganger for ruten på en spesifikk dato
- * - Håndtere både vanlige avganger og spesifikke unntak (som forsinkelser, ekstra avganger, kanselleringer)
+ * Representerer alle avganger for en rute på en bestemt dato.
+ * Håndterer både faste frekvenser og unntak som kanselleringer eller ekstraavganger.
  */
 public class Schedule {
-    // --- Felt ---
-    private final Route route;                    // ruten som denne tidsplanen gjelder for
-    private final LocalDate date;                  // datoen for denne tidsplanen
-    private final List<Frequency> frequencies;     // liste over frekvenser som bestemmer avgangstidene
-    private final List<ExceptionEntry> exceptions; // liste over unntak som kan påvirke avganger
 
-    // --- Konstruktører ---
+    // --- Felt ---
+
+    private final Route route;                     // Ruten tidsplanen gjelder for
+    private final LocalDate date;                  // Dato for tidsplanen
+    private final List<Frequency> frequencies;    // Frekvenser som definerer faste avgangstider
+    private final List<ExceptionEntry> exceptions;// Unntak som påvirker avganger (f.eks. kanselleringer, forsinkelser)
+
+    // --- Konstruktør ---
+
     /**
-     * Konstruktør som oppretter en tidsplan for en gitt rute og dato,
-     * og setter opp lister for frekvenser og unntak.
-     *
-     * @param route ruten som tidsplanen gjelder for
-     * @param date datoen for denne tidsplanen
-     * @param frequencies liste over frekvenser for avganger
-     * @param exceptions liste over unntak som kan påvirke avganger
+     * Oppretter en ny tidsplan for en rute på en gitt dato.
+     * Hvis frekvenser eller unntak er null, initialiseres tomme lister.
      */
     public Schedule(Route route, LocalDate date, List<Frequency> frequencies, List<ExceptionEntry> exceptions) {
-        // Validerer at rute og dato ikke er null
-        if (route == null) {
-            throw new IllegalArgumentException("Route cannot be null");
-        }
-        if (date == null) {
-            throw new IllegalArgumentException("Date cannot be null");
-        }
+        if (route == null) throw new IllegalArgumentException("Route cannot be null");
+        if (date == null) throw new IllegalArgumentException("Date cannot be null");
 
-        // Initialiserer feltene med de angitte verdiene, og tomme lister hvis null
         this.route = route;
         this.date = date;
         this.frequencies = frequencies != null ? frequencies : new ArrayList<>();
@@ -54,126 +37,78 @@ public class Schedule {
     }
 
     // --- Metoder ---
+
     /**
-     * Henter alle avganger for ruten på den spesifiserte datoen.
-     * Denne metoden returnerer avganger uavhengig av stopp.
-     *
-     * @return liste med alle avganger (LocalTime)
+     * Henter alle avgangstider for ruten på datoen til Schedule.
+     * Tar hensyn til frekvenser og unntak.
      */
     public List<LocalTime> getDepartures() {
-        return getDeparturesForStop(null); // Henter alle avganger uavhengig av stopp
+        return getDeparturesForStop(null);
     }
 
     /**
-     * Henter avganger for et spesifikt stopp på ruten på den spesifiserte datoen.
-     * Hvis stopp er null, hentes alle avganger for ruten.
+     * Henter avgangstider for et spesifikt stopp.
+     * Beregner tiden fra rutenes starttidspunkt, og tar hensyn til unntak.
      *
-     * @param stop stoppet for hvilke avganger skal hentes
-     * @return liste med avganger for det spesifikke stoppet (LocalTime)
+     * @param stop Stoppested som avganger skal beregnes for. Null for hele ruten.
+     * @return Liste av LocalTime for avgangene, sortert og unike.
      */
-    public List<LocalTime> getDeparturesForStop(Stop stop) {
-        List<LocalTime> departures = new ArrayList<>(); // Liste for å lagre avganger
+    public List<LocalTime> getDeparturesForStop(Stops stop) {
+        List<LocalTime> departures = new ArrayList<>();
 
-        // Henter avganger basert på frekvenser for ruten, datoen og sesongen
+        // Gå gjennom alle frekvenser og finn de som gjelder denne ruten, dato og sesong
         for (Frequency freq : frequencies) {
-            // Sjekker om frekvensen gjelder for ruten, dagen og sesongen
-            if (freq.getRoute().equals(route)
-                    && freq.getWeekday() == Weekday.fromLocalDate(date)
-                    && freq.getSeason().isActiveOn(date)) {
+            if (freq.getRoute().equals(route) &&
+                    freq.getWeekday() == Weekday.fromLocalDate(date) &&
+                    freq.getSeason().isActiveOn(date)) {
 
-                // Henter grunnleggende avgangstider for denne frekvensen
                 List<LocalTime> baseDepartures = freq.getDepartureTimes();
 
-                // Hvis et stopp er gitt, justerer vi avgangstiden med reisetiden til stoppet
+                // Hvis vi skal hente avganger for et spesifikt stopp, legg til tidsforskyvning
                 if (stop != null) {
-                    // Henter stoppet på ruten og justerer avgangstidene
-                    RouteStop rs = route.getStops().stream()
+                    RouteStops rs = route.getStops().stream()
                             .filter(s -> s.getStop().equals(stop))
                             .findFirst()
                             .orElse(null);
 
-                    // Hvis stoppet finnes på ruten, justeres avgangstidene
                     if (rs != null) {
-                        int minutes = rs.getTimeFromStart(); // Henter reisetid til stoppet
+                        int minutes = rs.getTimeFromStart();
                         baseDepartures = baseDepartures.stream()
-                                .map(t -> t.plusMinutes(minutes)) // Legger til reisetid til hver avgang
+                                .map(t -> t.plusMinutes(minutes))
                                 .collect(Collectors.toList());
-                    } else {
-                        // Hvis stoppet ikke finnes på ruta, hoppes denne frekvensen over
-                        continue;
-                    }
+                    } else continue; // Stoppet finnes ikke på ruten
                 }
 
-                // Legger til de grunnleggende avgangstidene for denne frekvensen
                 departures.addAll(baseDepartures);
             }
         }
 
-        // --- Håndtering av unntak ---
-        // Håndterer eventuelle unntak for forsinkelser, ekstra avganger eller kanselleringer
+        // Håndter unntak (kansellering, ekstraavganger, forsinkelser)
+        List<LocalTime> finalDepartures = new ArrayList<>(departures);
         for (ExceptionEntry entry : exceptions) {
-            // Sjekker om unntaket er aktivt, gjelder for den rette ruten og datoen
-            if (!entry.isActive()) continue;
-            if (!entry.getRoute().equals(route)) continue;
-            if (!entry.appliesTo(date)) continue;
+            if (!entry.isActive() || !entry.getRoute().equals(route) || !entry.appliesTo(date)) continue;
+            if (stop != null && entry.getStop() != null && !entry.affectsStop(stop)) continue;
 
-            // Filtrer: gjelder unntaket stoppet, eller er det et generelt unntak?
-            if (stop == null || entry.getStop() == null || entry.affectsStop(stop)) {
-                LocalTime depTime = entry.getDepartureTime();
-
-                // Håndterer de forskjellige typene unntak
-                if (entry.isCancelled() || entry.isOmitted()) {
-                    departures.remove(depTime); // Fjerner kansellerte eller utelatte avganger
-                } else if (entry.isExtra()) {
-                    departures.add(depTime); // Legger til ekstra avganger
-                } else if (entry.isDelayed()) {
-                    departures.remove(depTime); // Fjerner opprinnelige avganger og legger til forsinkede
-                    departures.add(depTime.plusMinutes(5)); // Eksempel på forsinkelse på 5 minutter
-                }
+            LocalTime depTime = entry.getDepartureTime();
+            if (entry.isCancelled() || entry.isOmitted()) finalDepartures.remove(depTime);
+            else if (entry.isExtra()) finalDepartures.add(depTime);
+            else if (entry.isDelayed()) {
+                finalDepartures.remove(depTime);
+                finalDepartures.add(depTime.plusMinutes(5));
             }
         }
 
-        // Fjern duplikater og sorter avganger i stigende rekkefølge
-        return departures.stream()
-                .distinct() // Fjerner duplikater
-                .sorted(Comparator.naturalOrder()) // Sorterer avganger
-                .collect(Collectors.toList()); // Samler resultatet tilbake i en liste
+        // Sorter og fjern duplikater før returnering
+        return finalDepartures.stream()
+                .distinct()
+                .sorted(Comparator.naturalOrder())
+                .collect(Collectors.toList());
     }
 
     // --- Gettere ---
-    /**
-     * Henter ruten som denne tidsplanen gjelder for.
-     *
-     * @return ruten (Route)
-     */
-    public Route getRoute() {
-        return route;
-    }
 
-    /**
-     * Henter datoen for tidsplanen.
-     *
-     * @return datoen (LocalDate)
-     */
-    public LocalDate getDate() {
-        return date;
-    }
-
-    /**
-     * Henter alle frekvenser for ruten på denne datoen.
-     *
-     * @return liste over frekvenser (Frequency)
-     */
-    public List<Frequency> getFrequencies() {
-        return frequencies;
-    }
-
-    /**
-     * Henter alle unntak som kan påvirke avganger på denne datoen.
-     *
-     * @return liste over unntak (ExceptionEntry)
-     */
-    public List<ExceptionEntry> getExceptions() {
-        return exceptions;
-    }
+    public Route getRoute() { return route; }                       // Ruten tidsplanen gjelder for
+    public LocalDate getDate() { return date; }                     // Dato for tidsplanen
+    public List<Frequency> getFrequencies() { return frequencies; } // Liste av frekvenser
+    public List<ExceptionEntry> getExceptions() { return exceptions; } // Liste av unntak
 }
