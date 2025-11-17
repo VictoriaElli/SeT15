@@ -2,41 +2,33 @@ package service;
 
 import domain.model.*;
 import dto.DepartureDTO;
-import dto.DepartureRequestDTO;
-import dto.DepartureResponseDTO;
 import port.outbound.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
-public class ScheduleService {
+public class ScheduleServiceWithoutDTO {
 
     private final RouteRepositoryPort routeRepo;
     private final RouteStopsRepositoryPort routeStopsRepo;
     private final FrequencyRepositoryPort frequencyRepo;
     private final ExceptionEntryRepositoryPort exceptionRepo;
-    private final StopsRepositoryPort stopsRepo;
 
     private List<Route> allRoutes = new ArrayList<>();
     private Map<Integer, List<Frequency>> scheduleMap = new HashMap<>();
 
-    public ScheduleService(RouteRepositoryPort routeRepo,
-                           RouteStopsRepositoryPort routeStopsRepo,
-                           FrequencyRepositoryPort frequencyRepo,
-                           ExceptionEntryRepositoryPort exceptionRepo,
-                           StopsRepositoryPort stopsRepo) {
+    public ScheduleServiceWithoutDTO(RouteRepositoryPort routeRepo,
+                                     RouteStopsRepositoryPort routeStopsRepo,
+                                     FrequencyRepositoryPort frequencyRepo,
+                                     ExceptionEntryRepositoryPort exceptionRepo) {
         this.routeRepo = routeRepo;
         this.routeStopsRepo = routeStopsRepo;
         this.frequencyRepo = frequencyRepo;
         this.exceptionRepo = exceptionRepo;
-        this.stopsRepo = stopsRepo;
     }
 
-    /**
-     * Bygger tidstabeller for alle ruter med frekvens og sesongfiltrering.
-     * Tar hensyn til dato og ukedag.
-     */
+    /** Bygger tidstabeller for alle ruter med frekvens og sesongfiltrering */
     public void buildSchedule(LocalDate referenceDate) {
         allRoutes = routeRepo.readAll();
         List<RouteStops> allRouteStops = routeStopsRepo.readAll();
@@ -57,51 +49,48 @@ public class ScheduleService {
         Weekday weekday = Weekday.fromLocalDate(referenceDate);
         scheduleMap.clear();
 
-        // Sett frekvenser per rute
         for (Route route : allRoutes) {
             List<Frequency> activeFrequencies = frequencyRepo.findActiveForRouteAndDate(route, referenceDate);
-
-            // Hvis ingen frekvenser på dato, prøv ukedag
             if (activeFrequencies.isEmpty()) {
                 activeFrequencies = frequencyRepo.findByRouteAndWeekday(route, weekday);
             }
 
-            // Unngå duplikater: map med første stopp departure som nøkkel
+            // Fjern duplikater
             Map<LocalTime, Frequency> uniqueFreq = new HashMap<>();
             for (Frequency freq : activeFrequencies) {
                 for (LocalTime dep : freq.getDepartureTimes()) {
                     uniqueFreq.putIfAbsent(dep, freq);
                 }
             }
-
             scheduleMap.put(route.getId(), new ArrayList<>(uniqueFreq.values()));
         }
     }
 
     /**
-     * Hent planlagte avganger mellom to stopp på gitt dato og tid, med valgt TimeMode
+     * Hent avganger med TimeMode støtte.
      */
-    public List<DepartureResponseDTO> getDepartures(DepartureRequestDTO request) {
-        Stops fromStop = findStopByName(request.getFromStop());
-        Stops toStop = findStopByName(request.getToStop());
+    public List<DepartureDTO> getDepartures(Stops fromStop, Stops toStop,
+                                            LocalDate travelDate, LocalTime travelTime,
+                                            TimeMode timeMode) {
         if (fromStop == null || toStop == null) return Collections.emptyList();
 
-        LocalDate travelDate = request.getTravelDate();
-        LocalTime travelTime = request.getTravelTime();
-        TimeMode timeMode = request.getTimeMode();
-
-        // Oppdater scheduleMap for valgt dato
+        // Oppdater schedule for valgt dato
         buildSchedule(travelDate);
 
-        List<DepartureResponseDTO> departures = new ArrayList<>();
+        if (timeMode == TimeMode.NOW) {
+            travelDate = LocalDate.now();
+            travelTime = LocalTime.now();
+        }
+
         Weekday weekday = Weekday.fromLocalDate(travelDate);
+        List<DepartureDTO> departures = new ArrayList<>();
 
         for (Route route : allRoutes) {
             if (!routeHasStopsInOrder(route, fromStop, toStop)) continue;
 
             List<Frequency> routeFrequencies = scheduleMap.getOrDefault(route.getId(), Collections.emptyList());
 
-            // Finn aktive exception entries
+            // Hent exception entries
             Set<ExceptionEntry> activeExceptions = new HashSet<>();
             activeExceptions.addAll(exceptionRepo.findActiveForRouteAndDate(route, travelDate));
             activeExceptions.addAll(exceptionRepo.findActiveForRouteAndWeekday(route, weekday));
@@ -110,107 +99,87 @@ public class ScheduleService {
 
             Set<LocalTime> addedDepartures = new HashSet<>();
 
-            // Ordinære frekvenser
+            // Ordinære avganger
             for (Frequency freq : routeFrequencies) {
                 for (LocalTime firstStopDeparture : freq.getDepartureTimes()) {
                     int minutesFromStart = getMinutesFromStart(route, fromStop);
                     LocalTime plannedDeparture = firstStopDeparture.plusMinutes(minutesFromStart);
+
                     if (addedDepartures.contains(plannedDeparture)) continue;
+
+                    // Sjekk for cancel/omitted
+                    boolean skip = activeExceptions.stream()
+                            .anyMatch(ex -> ex.affectsStop(fromStop) &&
+                                    ex.getDepartureTime().equals(firstStopDeparture) &&
+                                    (ex.isCancelled() || ex.isOmitted()));
+                    if (skip) continue;
+
                     addedDepartures.add(plannedDeparture);
 
-                    LocalTime arrivalTime = calculateArrivalTime(route, toStop, firstStopDeparture);
+                    // Beregn korrekt arrivalTime mellom fromStop og toStop
+                    LocalTime arrivalTime = calculateArrivalTime(route, fromStop, toStop, firstStopDeparture);
 
-                    boolean skip = switch (timeMode) {
+                    boolean timeSkip = switch (timeMode) {
                         case DEPART -> plannedDeparture.isBefore(travelTime);
                         case ARRIVAL -> arrivalTime.isAfter(travelTime);
                         case NOW -> plannedDeparture.isBefore(travelTime);
                     };
-                    if (skip) continue;
+                    if (timeSkip) continue;
 
-                    boolean isExtra = false, isCancelled = false, isOmitted = false;
-                    String operationMessage = null;
-                    for (ExceptionEntry ex : activeExceptions) {
-                        if (ex.affectsStop(fromStop) && ex.getDepartureTime().equals(firstStopDeparture)) {
-                            if (ex.isExtra()) isExtra = true;
-                            if (ex.isCancelled()) isCancelled = true;
-                            if (ex.isOmitted()) isOmitted = true;
-                            if (ex.getOperationMessage() != null)
-                                operationMessage = ex.getOperationMessage().getMessage();
-                        }
-                    }
-                    if (isCancelled || isOmitted) continue;
+                    String operationMessage = activeExceptions.stream()
+                            .filter(ex -> ex.getDepartureTime().equals(firstStopDeparture))
+                            .map(ex -> ex.getOperationMessage() != null ? ex.getOperationMessage().getMessage() : null)
+                            .filter(Objects::nonNull)
+                            .findFirst().orElse(null);
 
-                    departures.add(new DepartureResponseDTO(
-                            new DepartureDTO(
-                                    route.getId(),
-                                    fromStop.getId(),
-                                    fromStop.getName(),
-                                    toStop.getId(),
-                                    toStop.getName(),
-                                    travelDate,
-                                    plannedDeparture,
-                                    arrivalTime,
-                                    isExtra,
-                                    false,
-                                    isCancelled,
-                                    isOmitted,
-                                    0,
-                                    operationMessage
-                            ),
-                            timeMode
-                    ));
+                    departures.add(createDepartureDTO(route, fromStop, toStop,
+                            travelDate, plannedDeparture, arrivalTime, false, operationMessage));
                 }
             }
 
-            // Ekstraavganger fra exception entries
+            // Ekstraavganger
             for (ExceptionEntry ex : activeExceptions) {
-                if (!ex.isExtra()) continue;
-                int minutesFromStart = getMinutesFromStart(route, fromStop);
-                LocalTime plannedDeparture = ex.getDepartureTime().plusMinutes(minutesFromStart);
-                if (addedDepartures.contains(plannedDeparture)) continue;
-                addedDepartures.add(plannedDeparture);
+                if (!ex.isExtra() || !ex.affectsStop(fromStop)) continue;
 
-                LocalTime arrivalTime = calculateArrivalTime(route, toStop, ex.getDepartureTime());
-                boolean skip = switch (timeMode) {
+                LocalTime firstStopDeparture = ex.getDepartureTime();
+                int minutesFromStart = getMinutesFromStart(route, fromStop);
+                LocalTime plannedDeparture = firstStopDeparture.plusMinutes(minutesFromStart);
+                if (addedDepartures.contains(plannedDeparture)) continue;
+
+                LocalTime arrivalTime = calculateArrivalTime(route, fromStop, toStop, firstStopDeparture);
+                boolean timeSkip = switch (timeMode) {
                     case DEPART -> plannedDeparture.isBefore(travelTime);
                     case ARRIVAL -> arrivalTime.isAfter(travelTime);
                     case NOW -> plannedDeparture.isBefore(travelTime);
                 };
-                if (skip) continue;
+                if (timeSkip) continue;
 
-                departures.add(new DepartureResponseDTO(
-                        new DepartureDTO(
-                                route.getId(),
-                                fromStop.getId(),
-                                fromStop.getName(),
-                                toStop.getId(),
-                                toStop.getName(),
-                                travelDate,
-                                plannedDeparture,
-                                arrivalTime,
-                                true,
-                                false,
-                                false,
-                                false,
-                                0,
-                                ex.getOperationMessage() != null ? ex.getOperationMessage().getMessage() : null
-                        ),
-                        timeMode
-                ));
+                departures.add(createDepartureDTO(route, fromStop, toStop,
+                        travelDate, plannedDeparture, arrivalTime, true,
+                        ex.getOperationMessage() != null ? ex.getOperationMessage().getMessage() : null));
+                addedDepartures.add(plannedDeparture);
             }
         }
 
-        // Sorter basert på TimeMode
+        // Sortering
         if (timeMode == TimeMode.ARRIVAL) {
-            departures.sort(Comparator.comparing(DepartureResponseDTO::getArrivalTime).reversed());
+            departures.sort(Comparator.comparing(DepartureDTO::getArrivalTime).reversed());
         } else {
-            departures.sort(Comparator.comparing(DepartureResponseDTO::getPlannedDeparture));
+            departures.sort(Comparator.comparing(DepartureDTO::getPlannedDeparture));
         }
 
         return departures;
     }
 
     // --- Hjelpemetoder ---
+    private int getMinutesFromStart(Route route, Stops stop) {
+        return route.getStops().stream()
+                .filter(rs -> rs.getStop().getId() == stop.getId())
+                .findFirst()
+                .map(RouteStops::getTimeFromStart)
+                .orElse(0);
+    }
+
     private boolean routeHasStopsInOrder(Route route, Stops fromStop, Stops toStop) {
         List<RouteStops> stops = route.getStops();
         int fromIndex = -1, toIndex = -1;
@@ -221,28 +190,37 @@ public class ScheduleService {
         return fromIndex >= 0 && toIndex >= 0 && fromIndex < toIndex;
     }
 
-    private LocalTime calculateArrivalTime(Route route, Stops toStop, LocalTime plannedDeparture) {
-        RouteStops toRouteStop = route.getStops().stream()
-                .filter(rs -> rs.getStop().getId() == toStop.getId())
-                .findFirst()
-                .orElse(null);
-        if (toRouteStop == null) return plannedDeparture;
-        return plannedDeparture.plusMinutes(toRouteStop.getTimeFromStart());
+    private LocalTime calculateArrivalTime(Route route, Stops fromStop, Stops toStop, LocalTime firstStopDeparture) {
+        int fromMinutes = getMinutesFromStart(route, fromStop);
+        int toMinutes = getMinutesFromStart(route, toStop);
+        return firstStopDeparture.plusMinutes(toMinutes - fromMinutes);
     }
 
-    private int getMinutesFromStart(Route route, Stops stop) {
-        return route.getStops().stream()
-                .filter(rs -> rs.getStop().getId() == stop.getId())
-                .findFirst()
-                .map(RouteStops::getTimeFromStart)
-                .orElse(0);
+    private boolean isInSeason(Frequency freq, LocalDate date) {
+        return freq.getSeason() == null || freq.getSeason().isActiveOn(date);
     }
 
-    private Stops findStopByName(String name) {
-        return stopsRepo.readAll().stream()
-                .filter(s -> s.getName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElse(null);
+    private DepartureDTO createDepartureDTO(Route route, Stops fromStop, Stops toStop,
+                                            LocalDate travelDate, LocalTime plannedDeparture,
+                                            LocalTime arrivalTime, boolean isExtra, String operationMessage) {
+        DepartureDTO dto = new DepartureDTO(
+                route.getId(),
+                fromStop.getId(),
+                fromStop.getName(),
+                toStop.getId(),
+                toStop.getName(),
+                travelDate,
+                plannedDeparture,
+                arrivalTime,
+                isExtra,
+                false, // isDelayed
+                false, // isCancelled
+                false, // isOmitted
+                0,     // delayMinutes
+                operationMessage
+        );
+        dto.setRouteNumber(route.getRouteNum());
+        return dto;
     }
 
     // --- CRUD-metoder ---
