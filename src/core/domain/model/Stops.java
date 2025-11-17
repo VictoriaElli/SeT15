@@ -37,7 +37,7 @@ public class Stops {
     /**
      * Full konstruktør når stoppestedet eksisterer med ID.
      */
-    public Stops(int id, String name, double latitude, double longitude) {
+    public Stops(int id, String name, double latitude, double longitude, boolean isActive) {
         this.id = id;
         this.name = name;
         setLatitude(latitude);
@@ -48,7 +48,7 @@ public class Stops {
     /**
      * Konstruktør for nytt stoppested uten ID (ID genereres av databasen).
      */
-    public Stops(String name, double latitude, double longitude) {
+    public Stops(String name, double latitude, double longitude, boolean isActive) {
         this.name = name;
         setLatitude(latitude);
         setLongitude(longitude);
@@ -58,12 +58,12 @@ public class Stops {
     /**
      * Konstruktør når kun ID og navn er kjent.
      */
-    public Stops(int id, String name) { this(id, name, 0, 0); }
+    public Stops(int id, String name) { this(id, name, 0, 0, true); }
 
     /**
      * Konstruktør når kun navn er kjent.
      */
-    public Stops(String name) { this(name, 0, 0); }
+    public Stops(String name) { this(name, 0, 0, true); }
 
     // --- Validering ---
 
@@ -142,27 +142,12 @@ public class Stops {
         if (this == o) return true;
         if (!(o instanceof Stops)) return false;
         Stops other = (Stops) o;
-
-        if (this.id != 0 && other.id != 0) return this.id == other.id;
-
-        return name != null && name.equals(other.name)
-                && Double.compare(latitude, other.latitude) == 0
-                && Double.compare(longitude, other.longitude) == 0;
+        return this.id == other.id;
     }
 
-    /**
-     * Hash genereres fra ID hvis tilgjengelig, ellers fra navn og koordinater.
-     */
     @Override
     public int hashCode() {
-        if (id != 0) return Integer.hashCode(id);
-
-        int result = name != null ? name.hashCode() : 0;
-        long latBits = Double.doubleToLongBits(latitude);
-        long lonBits = Double.doubleToLongBits(longitude);
-
-        result = 31 * result + (int)(latBits ^ (latBits >>> 32));
-        result = 31 * result + (int)(lonBits ^ (lonBits >>> 32));
-        return result;
+        return Integer.hashCode(id);
     }
+
 }

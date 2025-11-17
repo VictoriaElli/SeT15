@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Representerer frekvensen av avganger for en gitt rute, på en bestemt ukedag og i en gitt sesong.
@@ -65,15 +66,39 @@ public class Frequency {
      */
     public List<LocalTime> getDepartureTimes() {
         List<LocalTime> times = new ArrayList<>();
-        if (firstDeparture == null || lastDeparture == null || intervalMinutes <= 0) return times;
+        if (firstDeparture == null || lastDeparture == null || intervalMinutes <= 0)
+            return times;
 
         LocalTime t = firstDeparture;
-        while (!t.isAfter(lastDeparture)) {
+
+        // Hvis siste avgang er neste dag (over midnatt)
+        boolean wrapsToNextDay = lastDeparture.isBefore(firstDeparture);
+
+        int safety = 0;  // hindrer infinite loops
+
+        while (true) {
+
             times.add(t);
+
+            // Hvis normal dag
+            if (!wrapsToNextDay && t.equals(lastDeparture))
+                break;
+
+            // Hvis over midnatt
+            if (wrapsToNextDay && t.equals(lastDeparture))
+                break;
+
             t = t.plusMinutes(intervalMinutes);
+
+            // Sikring: stopp hvis det går mer enn 24h med intervaller
+            safety++;
+            if (safety > (24 * 60) / intervalMinutes + 2)
+                break; // unngår infinite loop
         }
+
         return times;
     }
+
 
     /**
      * Sjekker om et tidspunkt ligger innenfor første og siste avgang.
@@ -102,6 +127,33 @@ public class Frequency {
         return Duration.between(firstDeparture, lastDeparture);
     }
 
+    /**
+     * Returnerer alle avgangstidspunkter med delay lagt til (uten å endre original).
+     */
+    public List<LocalTime> getDelayedDepartureTimes(int delayMinutes) {
+        return getDepartureTimes().stream()
+                .map(t -> t.plusMinutes(delayMinutes))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Sjekk om en Frequency matcher en ExceptionEntry (kan være basert på rute og tidspunkt).
+     */
+    public boolean matches(ExceptionEntry entry) {
+        if (!route.equals(entry.getRoute())) return false;
+
+        // Hvis entry har konkret dato eller ukedag, sjekk om noen avgangstid faller innenfor
+        LocalTime entryTime = entry.getDepartureTime(); // du må ha et tidspunkt på ExceptionEntry
+        return entryTime != null && isWithinTimeRange(entryTime);
+    }
+
+    /**
+     * Legg til en ekstra avgang basert på en ExceptionEntry.
+     * Returnerer nytt LocalTime som skal legges inn i schedule.
+     */
+    public LocalTime toFrequency(ExceptionEntry extraEntry) {
+        return extraEntry.getDepartureTime(); // du kan justere med delay her også hvis ønskelig
+    }
 
     // --- Gettere / Settere ---
 

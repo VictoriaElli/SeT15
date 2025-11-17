@@ -44,18 +44,21 @@ public class Route {
 
     // --- Konstruktører ---
 
-    public Route(int id, int routeNum, Stops fromStop, Stops toStop) {
+    public Route(int id, int routeNum, Stops fromStop, Stops toStop, boolean isActive) {
         this.id = id;
         this.routeNum = routeNum;
         this.fromStop = fromStop;
         this.toStop = toStop;
+        this.isActive = isActive;
     }
 
-    public Route(int routeNum, Stops fromStop, Stops toStop) {
+    public Route(int routeNum, Stops fromStop, Stops toStop, boolean isActive) {
         this.routeNum = routeNum;
         this.fromStop = fromStop;
         this.toStop = toStop;
+        this.isActive = isActive;
     }
+
 
     // --- Metoder ---
 
@@ -80,11 +83,13 @@ public class Route {
             stops = new ArrayList<>();
 
             // Startstopp
-            stops.add(new RouteStops(this, fromStop, 0, 0, 0));
+            stops.add(new RouteStops(this, fromStop, 1, 0, 0));
 
             // Mellomliggende stopp
+            int order = 2;
             for (RouteStops rs : getRouteStopsForRoute(this)) {
                 if (!rs.getStop().equals(fromStop) && !rs.getStop().equals(toStop)) {
+                    rs.setRouteOrder(order++);
                     stops.add(rs);
                 }
             }
@@ -95,7 +100,7 @@ public class Route {
                 stops.add(new RouteStops(
                         this,
                         toStop,
-                        stops.size(),
+                        order,
                         last.getTimeFromStart() + 5,
                         20
                 ));
@@ -135,29 +140,33 @@ public class Route {
     public boolean isActive() { return isActive; }
 
     // --- Settere ---
-
+    public void setId(int id) { this.id = id; }
     public void setFromStop(Stops fromStop) { this.fromStop = fromStop; }
     public void setToStop(Stops toStop) { this.toStop = toStop; }
     public void setActive(boolean isActive) { this.isActive = isActive; }
 
     // --- Overrides ---
+    @Override
+    public String toString() {
+        return "Route{" +
+                "id=" + id +
+                ", routeNum=" + routeNum +
+                ", fromStop=" + (fromStop != null ? fromStop.getName() : "null") +
+                ", toStop=" + (toStop != null ? toStop.getName() : "null") +
+                ", isActive=" + isActive +
+                '}';
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Route)) return false;
-        Route other = (Route) o;
-
-        return routeNum == other.routeNum
-                && fromStop != null && fromStop.equals(other.fromStop)
-                && toStop != null && toStop.equals(other.toStop);
+        return this.id == ((Route) o).id;
     }
 
     @Override
     public int hashCode() {
-        int result = Integer.hashCode(routeNum);
-        result = 31 * result + (fromStop != null ? fromStop.hashCode() : 0);
-        result = 31 * result + (toStop != null ? toStop.hashCode() : 0);
-        return result;
+        return Integer.hashCode(id);
     }
+
 }

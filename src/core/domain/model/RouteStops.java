@@ -88,7 +88,7 @@ public class RouteStops {
     public double getDistanceFromPrevious() { return distanceFromPrevious; }
 
     // --- Settere ---
-
+    public void setId(int id) { this.id = id; }
     public void setRoute(Route route) { this.route = route; }
     public void setStop(Stops stop) { this.stop = stop; }
 
