@@ -11,6 +11,7 @@ import java.io.IOException;
 
 public class DatabaseConnector {
 
+
     // Metode for å etablere en tilkobling
     public static Connection connect() throws SQLException, IOException, MySQLDatabaseException {
         DotenvUtil dotenv = new DotenvUtil("src/resources/database.env");
@@ -20,12 +21,6 @@ public class DatabaseConnector {
         String dbName = dotenv.get("DB_NAME");
         String dbUsername = dotenv.get("DB_USER");
         String dbPassword = dotenv.get("DB_PASSWORD");
-
-        System.out.println("Connecting to DB:");
-        System.out.println("Host: " + dbHost);
-        System.out.println("Port: " + dbPort);
-        System.out.println("Database: " + dbName);
-        System.out.println("Username: " + dbUsername);
 
         String dbUrl = String.format("jdbc:mysql://%s:%s/%s", dbHost, dbPort, dbName);
 
@@ -48,21 +43,5 @@ public class DatabaseConnector {
         } catch (SQLException | IOException | MySQLDatabaseException e) {
             e.printStackTrace();
         }
-    }
-
-    // Main-metode for å teste tilkobling og lese data
-    public static void main(String[] args) {
-        try (Connection connection = connect()) {
-            if (connection != null) {
-                System.out.println("Database connection successful!");
-            }
-        } catch (SQLException | IOException | MySQLDatabaseException e) {
-            e.printStackTrace();
-        }
-
-        // Les fra databasen
-        readData("SELECT * FROM stops"); // Bytt 'stops' med ønsket tabell
-
-
     }
 }
