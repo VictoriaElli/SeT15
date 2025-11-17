@@ -1,5 +1,6 @@
 package dto;
 
+import domain.model.TimeMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
@@ -10,48 +11,31 @@ public class DepartureRequestDTO {
     private String toStop;
     private LocalDate travelDate;
     private LocalTime travelTime;
+    private TimeMode timeMode;
 
     // --- Constructor ---
-    public DepartureRequestDTO(String fromStop, String toStop, LocalDate travelDate, LocalTime travelTime) {
+    public DepartureRequestDTO(String fromStop, String toStop, LocalDate travelDate,
+                               LocalTime travelTime, TimeMode timeMode) {
         this.fromStop = fromStop;
         this.toStop = toStop;
         this.travelDate = travelDate;
         this.travelTime = travelTime;
+        this.timeMode = timeMode != null ? timeMode : TimeMode.NOW; // default
     }
 
     // --- Getters ---
-    public String getFromStop() {
-        return fromStop;
-    }
-
-    public String getToStop() {
-        return toStop;
-    }
-
-    public LocalDate getTravelDate() {
-        return travelDate;
-    }
-
-    public LocalTime getTravelTime() {
-        return travelTime;
-    }
+    public String getFromStop() { return fromStop; }
+    public String getToStop() { return toStop; }
+    public LocalDate getTravelDate() { return travelDate; }
+    public LocalTime getTravelTime() { return travelTime; }
+    public TimeMode getTimeMode() { return timeMode; }
 
     // --- Setters ---
-    public void setFromStop(String fromStop) {
-        this.fromStop = fromStop;
-    }
-
-    public void setToStop(String toStop) {
-        this.toStop = toStop;
-    }
-
-    public void setTravelDate(LocalDate travelDate) {
-        this.travelDate = travelDate;
-    }
-
-    public void setTravelTime(LocalTime travelTime) {
-        this.travelTime = travelTime;
-    }
+    public void setFromStop(String fromStop) { this.fromStop = fromStop; }
+    public void setToStop(String toStop) { this.toStop = toStop; }
+    public void setTravelDate(LocalDate travelDate) { this.travelDate = travelDate; }
+    public void setTravelTime(LocalTime travelTime) { this.travelTime = travelTime; }
+    public void setTimeMode(TimeMode timeMode) { this.timeMode = timeMode; }
 
     // --- Override toString() ---
     @Override
@@ -61,6 +45,7 @@ public class DepartureRequestDTO {
                 ", toStop='" + toStop + '\'' +
                 ", travelDate=" + travelDate +
                 ", travelTime=" + travelTime +
+                ", timeMode=" + timeMode +
                 '}';
     }
 
@@ -73,11 +58,12 @@ public class DepartureRequestDTO {
         return Objects.equals(fromStop, that.fromStop) &&
                 Objects.equals(toStop, that.toStop) &&
                 Objects.equals(travelDate, that.travelDate) &&
-                Objects.equals(travelTime, that.travelTime);
+                Objects.equals(travelTime, that.travelTime) &&
+                timeMode == that.timeMode;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fromStop, toStop, travelDate, travelTime);
+        return Objects.hash(fromStop, toStop, travelDate, travelTime, timeMode);
     }
 }
