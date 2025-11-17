@@ -1,119 +1,129 @@
 package adapter;
 
-import domain.model.Frequency;
-import domain.model.Route;
-import domain.model.Season;
-import domain.model.Weekday;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-import port.outbound.ScheduleRepositoryPort;
+import domain.model.*;
+import port.outbound.FrequencyRepositoryPort;
 
+import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@Repository
-@Transactional
-public class FrequencyRepositoryMYSQLAdapter implements ScheduleRepositoryPort<Frequency> {
+public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort {
 
-    @PersistenceContext
-    private EntityManager em; // EntityManager for JPA-spørringer
+    private final Connection connection;
+    private final RouteRepositoryMYSQLAdapter routeRepo;
+    private final SeasonRepositoryMYSQLAdapter seasonRepo;
 
-    // --- Finn alle frekvenser for en gitt rute ---
+    public FrequencyRepositoryMYSQLAdapter(Connection connection,
+                                           RouteRepositoryMYSQLAdapter routeRepo,
+                                           SeasonRepositoryMYSQLAdapter seasonRepo) {
+        this.connection = connection;
+        this.routeRepo = routeRepo;
+        this.seasonRepo = seasonRepo;
+    }
+
+    // --- CRUD METHODS ---
+    @Override
+    public void create(Frequency freq) {
+        String sql = "INSERT INTO frequency (routeId, weekday, seasonId, firstDeparture, lastDeparture, intervalMinutes) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setInt(1, freq.getRoute().getId());
+            stmt.setString(2, freq.getWeekday().name());
+            stmt.setInt(3, freq.getSeason().getId());
+            stmt.setTime(4, Time.valueOf(freq.getFirstDeparture()));
+            stmt.setTime(5, Time.valueOf(freq.getLastDeparture()));
+            stmt.setInt(6, freq.getIntervalMinutes());
+            stmt.executeUpdate();
+
+            ResultSet keys = stmt.getGeneratedKeys();
+            if (keys.next()) freq.setId(keys.getInt(1));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<Frequency> readById(int id) {
+        String sql = "SELECT * FROM frequency WHERE id=?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return Optional.of(mapRowToFrequency(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Frequency> readAll() {
+        String sql = "SELECT * FROM frequency ORDER BY firstDeparture";
+        return executeQueryList(sql, null);
+    }
+
+    @Override
+    public void update(Frequency freq) {
+        String sql = "UPDATE frequency SET routeId=?, weekday=?, seasonId=?, firstDeparture=?, lastDeparture=?, intervalMinutes=? WHERE id=?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, freq.getRoute().getId());
+            stmt.setString(2, freq.getWeekday().name());
+            stmt.setInt(3, freq.getSeason().getId());
+            stmt.setTime(4, Time.valueOf(freq.getFirstDeparture()));
+            stmt.setTime(5, Time.valueOf(freq.getLastDeparture()));
+            stmt.setInt(6, freq.getIntervalMinutes());
+            stmt.setInt(7, freq.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void delete(Frequency freq) {
+        deleteById(freq.getId());
+    }
+
+    @Override
+    public void deleteById(int id) {
+        String sql = "DELETE FROM frequency WHERE id=?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // --- Finn frekvenser etter route ---
     @Override
     public List<Frequency> findByRoute(Route route) {
-        if (route == null) return List.of(); // returner tom liste hvis null
-        return em.createQuery(
-                        "SELECT f FROM Frequency f WHERE f.route = :route",
-                        Frequency.class)
-                .setParameter("route", route)
-                .getResultList();
+        if (route == null) return List.of();
+        String sql = "SELECT * FROM frequency WHERE routeId=? ORDER BY firstDeparture";
+        return executeQueryList(sql, stmt -> stmt.setInt(1, route.getId()));
     }
 
-    // --- Finn frekvenser for en rute på en spesifikk dato ---
     @Override
     public List<Frequency> findByRouteAndDate(Route route, LocalDate date) {
-        if (route == null || date == null) return List.of(); // trenger begge
-        Weekday weekday = Weekday.fromLocalDate(date);
-        return findByRouteAndWeekday(route, weekday); // map dato til ukedag
+        if (date == null) return List.of();
+        return findByRouteAndWeekday(route, Weekday.fromLocalDate(date));
     }
 
-    // --- Finn frekvenser for en rute på en spesifikk ukedag ---
     @Override
     public List<Frequency> findByRouteAndWeekday(Route route, Weekday weekday) {
-        if (route == null || weekday == null) return List.of();
-        return em.createQuery(
-                        "SELECT f FROM Frequency f WHERE f.route = :route AND f.weekday = :weekday",
-                        Frequency.class)
-                .setParameter("route", route)
-                .setParameter("weekday", weekday)
-                .getResultList();
+        if (weekday == null) return List.of();
+        String sql = "SELECT * FROM frequency WHERE weekday=?" + (route != null ? " AND routeId=?" : "") + " ORDER BY firstDeparture";
+        return executeQueryList(sql, stmt -> {
+            stmt.setString(1, weekday.name());
+            if (route != null) stmt.setInt(2, route.getId());
+        });
     }
 
-    // --- Finn aktive frekvenser for en rute på en spesifikk dato ---
-    @Override
-    public List<Frequency> findActiveForRouteAndDate(Route route, LocalDate date) {
-        if (date == null) return List.of();
-        Weekday weekday = Weekday.fromLocalDate(date);
-
-        String query = "SELECT f FROM Frequency f WHERE f.weekday = :weekday AND f.route.isActive = true";
-
-        if (route != null) {
-            query += " AND f.route = :route";
-            return em.createQuery(query, Frequency.class)
-                    .setParameter("weekday", weekday)
-                    .setParameter("route", route)
-                    .getResultList();
-        } else {
-            return em.createQuery(query, Frequency.class)
-                    .setParameter("weekday", weekday)
-                    .getResultList();
-        }
-    }
-
-    // --- Finn inaktive frekvenser for en rute på en spesifikk dato ---
-    @Override
-    public List<Frequency> findInactiveForRouteAndDate(Route route, LocalDate date) {
-        if (date == null) return List.of();
-        Weekday weekday = Weekday.fromLocalDate(date);
-
-        String query = "SELECT f FROM Frequency f WHERE f.weekday = :weekday AND f.route.isActive = false";
-
-        if (route != null) {
-            query += " AND f.route = :route";
-            return em.createQuery(query, Frequency.class)
-                    .setParameter("weekday", weekday)
-                    .setParameter("route", route)
-                    .getResultList();
-        } else {
-            return em.createQuery(query, Frequency.class)
-                    .setParameter("weekday", weekday)
-                    .getResultList();
-        }
-    }
-
-    // --- Finn alle frekvenser for en sesong ---
-    @Override
-    public List<Frequency> findBySeason(Season season) {
-        if (season == null) return List.of();
-        return em.createQuery(
-                        "SELECT f FROM Frequency f WHERE f.season = :season",
-                        Frequency.class)
-                .setParameter("season", season)
-                .getResultList();
-    }
-
-    // --- Finn alle frekvenser på en spesifikk dato ---
+    // --- Finn alle frekvenser på en dato ---
     @Override
     public List<Frequency> findAllOnDate(LocalDate date) {
-        if (date == null) return List.of();
-        Weekday weekday = Weekday.fromLocalDate(date);
-        return em.createQuery(
-                        "SELECT f FROM Frequency f WHERE f.weekday = :weekday",
-                        Frequency.class)
-                .setParameter("weekday", weekday)
-                .getResultList();
+        return findByRouteAndWeekday(null, Weekday.fromLocalDate(date));
     }
 
     @Override
@@ -126,34 +136,90 @@ public class FrequencyRepositoryMYSQLAdapter implements ScheduleRepositoryPort<F
         return findInactiveForRouteAndDate(null, date);
     }
 
-    // --- Finn alle frekvenser for en ukedag ---
+    // --- Finn alle frekvenser på en ukedag ---
     @Override
     public List<Frequency> findAllOnWeekday(Weekday weekday) {
-        if (weekday == null) return List.of();
-        return em.createQuery(
-                        "SELECT f FROM Frequency f WHERE f.weekday = :weekday",
-                        Frequency.class)
-                .setParameter("weekday", weekday)
-                .getResultList();
+        return findByRouteAndWeekday(null, weekday);
     }
 
     @Override
     public List<Frequency> findAllActiveOnWeekday(Weekday weekday) {
-        if (weekday == null) return List.of();
-        return em.createQuery(
-                        "SELECT f FROM Frequency f WHERE f.weekday = :weekday AND f.route.isActive = true",
-                        Frequency.class)
-                .setParameter("weekday", weekday)
-                .getResultList();
+        String sql = "SELECT f.* FROM frequency f JOIN route r ON f.routeId=r.id WHERE f.weekday=? AND r.isActive=TRUE ORDER BY f.firstDeparture";
+        return executeQueryList(sql, stmt -> stmt.setString(1, weekday.name()));
     }
 
     @Override
     public List<Frequency> findAllInactiveOnWeekday(Weekday weekday) {
-        if (weekday == null) return List.of();
-        return em.createQuery(
-                        "SELECT f FROM Frequency f WHERE f.weekday = :weekday AND f.route.isActive = false",
-                        Frequency.class)
-                .setParameter("weekday", weekday)
-                .getResultList();
+        String sql = "SELECT f.* FROM frequency f JOIN route r ON f.routeId=r.id WHERE f.weekday=? AND r.isActive=FALSE ORDER BY f.firstDeparture";
+        return executeQueryList(sql, stmt -> stmt.setString(1, weekday.name()));
+    }
+
+    @Override
+    public List<Frequency> findActiveForRouteAndDate(Route route, LocalDate date) {
+        return findByRouteAndDateActiveStatus(route, date, true);
+    }
+
+    @Override
+    public List<Frequency> findInactiveForRouteAndDate(Route route, LocalDate date) {
+        return findByRouteAndDateActiveStatus(route, date, false);
+    }
+
+    private List<Frequency> findByRouteAndDateActiveStatus(Route route, LocalDate date, boolean active) {
+        if (date == null) return List.of();
+        Weekday weekday = Weekday.fromLocalDate(date);
+        String sql = "SELECT f.* FROM frequency f JOIN route r ON f.routeId=r.id WHERE f.weekday=? AND r.isActive=?" + (route != null ? " AND r.id=?" : "") + " ORDER BY f.firstDeparture";
+        return executeQueryList(sql, stmt -> {
+            stmt.setString(1, weekday.name());
+            stmt.setBoolean(2, active);
+            if (route != null) stmt.setInt(3, route.getId());
+        });
+    }
+
+    // --- Finn frekvenser etter season ---
+    @Override
+    public List<Frequency> findBySeason(Season season) {
+        if (season == null) return List.of();
+        String sql = "SELECT * FROM frequency WHERE seasonId=? ORDER BY firstDeparture";
+        return executeQueryList(sql, stmt -> stmt.setInt(1, season.getId()));
+    }
+
+    // --- HELPER METHODS ---
+    private Frequency mapRowToFrequency(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+
+        // Les routeId først
+        int routeId = rs.getInt("routeId");
+        Route route = routeRepo.readById(routeId)
+                .orElseThrow(() -> new RuntimeException("Route not found: " + routeId));
+
+        Weekday weekday = Weekday.valueOf(rs.getString("weekday"));
+
+        int seasonId = rs.getInt("seasonId");
+        Season season = seasonRepo.readById(seasonId)
+                .orElseThrow(() -> new RuntimeException("Season not found: " + seasonId));
+
+        LocalTime first = rs.getTime("firstDeparture").toLocalTime();
+        LocalTime last = rs.getTime("lastDeparture").toLocalTime();
+        int interval = rs.getInt("intervalMinutes");
+
+        return new Frequency(id, route, weekday, season, first, last, interval);
+    }
+
+    private List<Frequency> executeQueryList(String sql, SQLConsumer<PreparedStatement> setter) {
+        List<Frequency> list = new ArrayList<>();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            if (setter != null) setter.accept(stmt);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) list.add(mapRowToFrequency(rs));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to execute query: " + sql, e);
+        }
+        return list;
+    }
+
+    @FunctionalInterface
+    private interface SQLConsumer<T> {
+        void accept(T t) throws SQLException;
     }
 }

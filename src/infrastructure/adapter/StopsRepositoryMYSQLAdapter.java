@@ -1,72 +1,157 @@
 package adapter;
 
 import domain.model.Stops;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-import port.outbound.FerryRepositoryPort;
+import port.outbound.StopsRepositoryPort;
 
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Adapter/repository for Stops-objekter i MySQL via JPA.
- * Implementerer FerryRepositoryPort slik at den kan brukes generisk i applikasjonen.
- */
-@Repository
-@Transactional // Alle metoder kjøres innenfor en transaksjon
-public class StopsRepositoryMYSQLAdapter implements FerryRepositoryPort<Stops> {
+public class StopsRepositoryMYSQLAdapter implements StopsRepositoryPort {
 
-    @PersistenceContext
-    private EntityManager em; // EntityManager håndterer JPA-operasjoner
+    private final Connection connection;
 
-    /**
-     * Finn et stopp basert på navn.
-     * Returnerer en Optional, som er tom dersom stoppet ikke finnes.
-     */
+    public StopsRepositoryMYSQLAdapter(Connection connection) {
+        this.connection = connection;
+    }
+
+    // --- CRUD METHODS ---
+    @Override
+    public void create(Stops stop) {
+        String sql = "INSERT INTO stops (name, latitude, longitude, isActive) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, stop.getName());
+            stmt.setDouble(2, stop.getLatitude());
+            stmt.setDouble(3, stop.getLongitude());
+            stmt.setBoolean(4, stop.isActive());
+            stmt.executeUpdate();
+
+            ResultSet keys = stmt.getGeneratedKeys();
+            if (keys.next()) stop.setId(keys.getInt(1));
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create stop", e);
+        }
+    }
+
+    @Override
+    public Optional<Stops> readById(int id) {
+        String sql = "SELECT * FROM stops WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return Optional.of(mapRowToStop(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to read stop by ID", e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Stops> readAll() {
+        List<Stops> stops = new ArrayList<>();
+        String sql = "SELECT * FROM stops";
+        try (Statement stmt = connection.createStatement()) {
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) stops.add(mapRowToStop(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to read all stops", e);
+        }
+        return stops;
+    }
+
+    @Override
+    public void update(Stops stop) {
+        String sql = "UPDATE stops SET name = ?, latitude = ?, longitude = ?, isActive = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, stop.getName());
+            stmt.setDouble(2, stop.getLatitude());
+            stmt.setDouble(3, stop.getLongitude());
+            stmt.setBoolean(4, stop.isActive());
+            stmt.setInt(5, stop.getId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update stop", e);
+        }
+    }
+
+    @Override
+    public void delete(Stops stop) {
+        deleteById(stop.getId());
+    }
+
+    @Override
+    public void deleteById(int id) {
+        String sql = "DELETE FROM stops WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to delete stop", e);
+        }
+    }
+
     @Override
     public Optional<Stops> findByName(String stopName) {
-        return em.createQuery("SELECT s FROM Stops s WHERE s.name = :name", Stops.class)
-                .setParameter("name", stopName)
-                .getResultStream() // Stream gir mulighet til å hente første match
-                .findFirst();      // Returnerer Optional<Stops>
+        String sql = "SELECT * FROM stops WHERE name = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, stopName);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return Optional.of(mapRowToStop(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find stop by name", e);
+        }
+        return Optional.empty();
     }
 
-    /**
-     * Hent alle aktive stopp.
-     * Brukes for å filtrere ut inaktive stopp fra ruter, kart osv.
-     */
     @Override
     public List<Stops> findAllActive() {
-        return em.createQuery("SELECT s FROM Stops s WHERE s.isActive = true", Stops.class)
-                .getResultList();
+        List<Stops> stops = new ArrayList<>();
+        String sql = "SELECT * FROM stops WHERE isActive = true";
+        try (Statement stmt = connection.createStatement()) {
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) stops.add(mapRowToStop(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find all active stops", e);
+        }
+        return stops;
     }
 
-    /**
-     * Finn alle stopp som ligger omtrent innenfor en gitt radius (km) fra et punkt.
-     * Beregner en enkel "bounding box" for å gjøre søket i databasen effektivt.
-     *
-     * @param latitude Breddegrad for sentrumspunktet
-     * @param longitude Lengdegrad for sentrumspunktet
-     * @param radiusKm Radius i kilometer
-     * @return Liste med Stops innenfor området
-     */
+    @Override
     public List<Stops> findNear(double latitude, double longitude, double radiusKm) {
-        // Omtrentlig konvertering fra km til grader
-        double latDiff = radiusKm / 111; // 1 grad bredde = ca. 111 km
-        double lonDiff = radiusKm / (111 * Math.cos(Math.toRadians(latitude)));
-        // Justering for lengdegrad ved forskjellige breddegrader
+        List<Stops> stops = new ArrayList<>();
+        double latDiff = radiusKm / 111.0;
+        double lonDiff = radiusKm / (111.0 * Math.cos(Math.toRadians(latitude)));
 
-        return em.createQuery(
-                        "SELECT s FROM Stops s WHERE s.isActive = true " +
-                                "AND s.latitude BETWEEN :minLat AND :maxLat " +
-                                "AND s.longitude BETWEEN :minLon AND :maxLon", Stops.class)
-                .setParameter("minLat", latitude - latDiff)
-                .setParameter("maxLat", latitude + latDiff)
-                .setParameter("minLon", longitude - lonDiff)
-                .setParameter("maxLon", longitude + lonDiff)
-                .getResultList();
+        String sql = """
+            SELECT * FROM stops
+            WHERE isActive = true
+              AND latitude BETWEEN ? AND ?
+              AND longitude BETWEEN ? AND ?
+        """;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setDouble(1, latitude - latDiff);
+            stmt.setDouble(2, latitude + latDiff);
+            stmt.setDouble(3, longitude - lonDiff);
+            stmt.setDouble(4, longitude + lonDiff);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) stops.add(mapRowToStop(rs));
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to find nearby stops", e);
+        }
+        return stops;
     }
 
+    // --- HELPER METHODS ---
+    private Stops mapRowToStop(ResultSet rs) throws SQLException {
+        return new Stops(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getDouble("latitude"),
+                rs.getDouble("longitude"),
+                rs.getBoolean("isActive")
+        );
+    }
 }
