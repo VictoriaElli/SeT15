@@ -1,4 +1,4 @@
-package port;
+package port.outbound;
 
 import domain.model.environment.DistanceBetweenStops;
 

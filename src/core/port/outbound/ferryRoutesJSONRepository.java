@@ -1,4 +1,4 @@
-package port;
+package port.outbound;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import domain.model.environment.DistanceBetweenStops;
