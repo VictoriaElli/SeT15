@@ -2,6 +2,7 @@ package port;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import domain.model.environment.DistanceBetweenStops;
+import port.outbound.ferryRoutesRepository;
 
 import java.io.File;
 import java.io.IOException;
