@@ -1,3 +1,5 @@
+package app;
+
 import database.DatabaseConnector;
 import domain.model.*;
 import adapter.*;
@@ -5,8 +7,7 @@ import exception.MySQLDatabaseException;
 import service.ScheduleServiceWithoutDTO;
 import dto.DepartureDTO;
 
-import java.sql.SQLException;
-import java.io.IOException;
+import javax.sql.DataSource;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -17,16 +18,16 @@ public class FerryApp {
         Scanner scanner = new Scanner(System.in);
 
         try {
-            var conn = DatabaseConnector.connect();
+            DataSource dataSource = DatabaseConnector.getDataSource();
 
             // --- Repository-adaptere ---
-            StopsRepositoryMYSQLAdapter stopsRepo = new StopsRepositoryMYSQLAdapter(conn);
-            RouteRepositoryMYSQLAdapter routeRepo = new RouteRepositoryMYSQLAdapter(conn);
-            SeasonRepositoryMYSQLAdapter seasonRepo = new SeasonRepositoryMYSQLAdapter(conn);
-            OperationMessageRepositoryMYSQLAdapter msgRepo = new OperationMessageRepositoryMYSQLAdapter(conn, routeRepo);
-            RouteStopsRepositoryMYSQLAdapter routeStopsRepo = new RouteStopsRepositoryMYSQLAdapter(conn, routeRepo, stopsRepo);
-            FrequencyRepositoryMYSQLAdapter frequencyRepo = new FrequencyRepositoryMYSQLAdapter(conn, routeRepo, seasonRepo);
-            ExceptionEntryRepositoryMYSQLAdapter exceptionRepo = new ExceptionEntryRepositoryMYSQLAdapter(conn, routeRepo, stopsRepo, seasonRepo, msgRepo);
+            StopsRepositoryMYSQLAdapter stopsRepo = new StopsRepositoryMYSQLAdapter(dataSource);
+            RouteRepositoryMYSQLAdapter routeRepo = new RouteRepositoryMYSQLAdapter(dataSource);
+            SeasonRepositoryMYSQLAdapter seasonRepo = new SeasonRepositoryMYSQLAdapter(dataSource);
+            OperationMessageRepositoryMYSQLAdapter msgRepo = new OperationMessageRepositoryMYSQLAdapter(dataSource, routeRepo);
+            RouteStopsRepositoryMYSQLAdapter routeStopsRepo = new RouteStopsRepositoryMYSQLAdapter(dataSource, routeRepo, stopsRepo);
+            FrequencyRepositoryMYSQLAdapter frequencyRepo = new FrequencyRepositoryMYSQLAdapter(dataSource, routeRepo, seasonRepo);
+            ExceptionEntryRepositoryMYSQLAdapter exceptionRepo = new ExceptionEntryRepositoryMYSQLAdapter(dataSource, routeRepo, stopsRepo, seasonRepo, msgRepo);
 
             // --- ScheduleService ---
             ScheduleServiceWithoutDTO scheduleService = new ScheduleServiceWithoutDTO(
@@ -69,12 +70,6 @@ public class FerryApp {
                     continue;
                 }
 
-                // --- Input: Dato og tid ---
-                System.out.print("Enter travel date (YYYY-MM-DD): ");
-                LocalDate date = LocalDate.parse(scanner.next());
-                System.out.print("Enter earliest departure time (HH:MM): ");
-                LocalTime time = LocalTime.parse(scanner.next());
-
                 // --- Input: TimeMode ---
                 TimeMode timeMode = null;
                 while (timeMode == null) {
@@ -93,8 +88,20 @@ public class FerryApp {
                     }
                 }
 
-                // --- Bygg tidsplan ---
-                scheduleService.buildSchedule(date);
+                // --- Input: Dato og tid (hvis ikke NOW) ---
+                LocalDate date = LocalDate.now();
+                LocalTime time = LocalTime.now();
+                if (timeMode != TimeMode.NOW) {
+                    System.out.print("Enter travel date (YYYY-MM-DD): ");
+                    date = LocalDate.parse(scanner.next());
+
+                    if (timeMode == TimeMode.DEPART) {
+                        System.out.print("Enter earliest departure time (HH:MM): ");
+                    } else {
+                        System.out.print("Enter desired arrival time (HH:MM): ");
+                    }
+                    time = LocalTime.parse(scanner.next());
+                }
 
                 // --- Hent avganger ---
                 List<DepartureDTO> departures = scheduleService.getDepartures(fromStop, toStop, date, time, timeMode);
@@ -121,7 +128,7 @@ public class FerryApp {
                 if (!cont.equalsIgnoreCase("y")) exit = true;
             }
 
-        } catch (SQLException | IOException | MySQLDatabaseException e) {
+        } catch (MySQLDatabaseException e) {
             System.err.println("Error connecting to database:");
             e.printStackTrace();
         }
