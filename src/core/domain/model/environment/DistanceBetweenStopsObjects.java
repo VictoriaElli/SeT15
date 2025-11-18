@@ -1,7 +1,6 @@
 package domain.model.environment;
 
-import port.ferryRoutesJSONRepository;
-import domain.model.environment.DistanceBetweenStops;
+import port.outbound.ferryRoutesJSONRepository;
 
 
 import java.io.File;
