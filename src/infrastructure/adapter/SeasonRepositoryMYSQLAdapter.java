@@ -1,27 +1,32 @@
 package adapter;
 
 import domain.model.Season;
+import org.springframework.stereotype.Repository;
 import port.outbound.SeasonRepositoryPort;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class SeasonRepositoryMYSQLAdapter implements SeasonRepositoryPort {
 
-    private final Connection connection;
+    private final DataSource dataSource;
 
-    public SeasonRepositoryMYSQLAdapter(Connection connection) {
-        this.connection = connection;
+    public SeasonRepositoryMYSQLAdapter(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     // --- CRUD METHODS ---
     @Override
     public void create(Season season) {
         String sql = "INSERT INTO season (seasonType, validYear, startDate, endDate) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setString(1, season.getSeasonType());
             stmt.setInt(2, season.getValidYear());
             stmt.setDate(3, season.getStartDate() != null ? Date.valueOf(season.getStartDate()) : null);
@@ -41,7 +46,9 @@ public class SeasonRepositoryMYSQLAdapter implements SeasonRepositoryPort {
     @Override
     public Optional<Season> readById(int id) {
         String sql = "SELECT * FROM season WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return Optional.of(mapResultSetToSeason(rs));
@@ -55,8 +62,10 @@ public class SeasonRepositoryMYSQLAdapter implements SeasonRepositoryPort {
     public List<Season> readAll() {
         List<Season> seasons = new ArrayList<>();
         String sql = "SELECT * FROM season";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
             while (rs.next()) seasons.add(mapResultSetToSeason(rs));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -67,7 +76,9 @@ public class SeasonRepositoryMYSQLAdapter implements SeasonRepositoryPort {
     @Override
     public void update(Season season) {
         String sql = "UPDATE season SET seasonType = ?, validYear = ?, startDate = ?, endDate = ? WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, season.getSeasonType());
             stmt.setInt(2, season.getValidYear());
             stmt.setDate(3, season.getStartDate() != null ? Date.valueOf(season.getStartDate()) : null);
@@ -87,7 +98,9 @@ public class SeasonRepositoryMYSQLAdapter implements SeasonRepositoryPort {
     @Override
     public void deleteById(int id) {
         String sql = "DELETE FROM season WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -99,7 +112,9 @@ public class SeasonRepositoryMYSQLAdapter implements SeasonRepositoryPort {
     public List<Season> findActiveByDate(LocalDate date) {
         List<Season> seasons = new ArrayList<>();
         String sql = "SELECT * FROM season WHERE startDate <= ? AND endDate >= ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setDate(1, Date.valueOf(date));
             stmt.setDate(2, Date.valueOf(date));
             ResultSet rs = stmt.executeQuery();
@@ -111,7 +126,6 @@ public class SeasonRepositoryMYSQLAdapter implements SeasonRepositoryPort {
         }
         return seasons;
     }
-
 
     // --- HELPER METHODS ---
     private Season mapResultSetToSeason(ResultSet rs) throws SQLException {

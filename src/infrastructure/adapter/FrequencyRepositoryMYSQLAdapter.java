@@ -1,8 +1,10 @@
 package adapter;
 
 import domain.model.*;
+import org.springframework.stereotype.Repository;
 import port.outbound.FrequencyRepositoryPort;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,16 +12,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort {
 
-    private final Connection connection;
+    private final DataSource dataSource;
     private final RouteRepositoryMYSQLAdapter routeRepo;
     private final SeasonRepositoryMYSQLAdapter seasonRepo;
 
-    public FrequencyRepositoryMYSQLAdapter(Connection connection,
+    public FrequencyRepositoryMYSQLAdapter(DataSource dataSource,
                                            RouteRepositoryMYSQLAdapter routeRepo,
                                            SeasonRepositoryMYSQLAdapter seasonRepo) {
-        this.connection = connection;
+        this.dataSource = dataSource;
         this.routeRepo = routeRepo;
         this.seasonRepo = seasonRepo;
     }
@@ -28,7 +31,9 @@ public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort 
     @Override
     public void create(Frequency freq) {
         String sql = "INSERT INTO frequency (routeId, weekday, seasonId, firstDeparture, lastDeparture, intervalMinutes) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setInt(1, freq.getRoute().getId());
             stmt.setString(2, freq.getWeekday().name());
             stmt.setInt(3, freq.getSeason().getId());
@@ -39,6 +44,7 @@ public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort 
 
             ResultSet keys = stmt.getGeneratedKeys();
             if (keys.next()) freq.setId(keys.getInt(1));
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -47,10 +53,14 @@ public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort 
     @Override
     public Optional<Frequency> readById(int id) {
         String sql = "SELECT * FROM frequency WHERE id=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) return Optional.of(mapRowToFrequency(rs));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return Optional.of(mapRowToFrequency(rs));
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -66,7 +76,9 @@ public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort 
     @Override
     public void update(Frequency freq) {
         String sql = "UPDATE frequency SET routeId=?, weekday=?, seasonId=?, firstDeparture=?, lastDeparture=?, intervalMinutes=? WHERE id=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, freq.getRoute().getId());
             stmt.setString(2, freq.getWeekday().name());
             stmt.setInt(3, freq.getSeason().getId());
@@ -75,6 +87,7 @@ public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort 
             stmt.setInt(6, freq.getIntervalMinutes());
             stmt.setInt(7, freq.getId());
             stmt.executeUpdate();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -88,9 +101,12 @@ public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort 
     @Override
     public void deleteById(int id) {
         String sql = "DELETE FROM frequency WHERE id=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
             stmt.executeUpdate();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -187,7 +203,6 @@ public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort 
     private Frequency mapRowToFrequency(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
 
-        // Les routeId først
         int routeId = rs.getInt("routeId");
         Route route = routeRepo.readById(routeId)
                 .orElseThrow(() -> new RuntimeException("Route not found: " + routeId));
@@ -207,11 +222,14 @@ public class FrequencyRepositoryMYSQLAdapter implements FrequencyRepositoryPort 
 
     private List<Frequency> executeQueryList(String sql, SQLConsumer<PreparedStatement> setter) {
         List<Frequency> list = new ArrayList<>();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             if (setter != null) setter.accept(stmt);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) list.add(mapRowToFrequency(rs));
             }
+
         } catch (SQLException e) {
             throw new RuntimeException("Failed to execute query: " + sql, e);
         }

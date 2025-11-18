@@ -1,26 +1,31 @@
 package adapter;
 
 import domain.model.Stops;
+import org.springframework.stereotype.Repository;
 import port.outbound.StopsRepositoryPort;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class StopsRepositoryMYSQLAdapter implements StopsRepositoryPort {
 
-    private final Connection connection;
+    private final DataSource dataSource;
 
-    public StopsRepositoryMYSQLAdapter(Connection connection) {
-        this.connection = connection;
+    public StopsRepositoryMYSQLAdapter(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     // --- CRUD METHODS ---
     @Override
     public void create(Stops stop) {
         String sql = "INSERT INTO stops (name, latitude, longitude, isActive) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setString(1, stop.getName());
             stmt.setDouble(2, stop.getLatitude());
             stmt.setDouble(3, stop.getLongitude());
@@ -37,7 +42,9 @@ public class StopsRepositoryMYSQLAdapter implements StopsRepositoryPort {
     @Override
     public Optional<Stops> readById(int id) {
         String sql = "SELECT * FROM stops WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return Optional.of(mapRowToStop(rs));
@@ -51,8 +58,10 @@ public class StopsRepositoryMYSQLAdapter implements StopsRepositoryPort {
     public List<Stops> readAll() {
         List<Stops> stops = new ArrayList<>();
         String sql = "SELECT * FROM stops";
-        try (Statement stmt = connection.createStatement()) {
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
             while (rs.next()) stops.add(mapRowToStop(rs));
         } catch (SQLException e) {
             throw new RuntimeException("Failed to read all stops", e);
@@ -63,7 +72,9 @@ public class StopsRepositoryMYSQLAdapter implements StopsRepositoryPort {
     @Override
     public void update(Stops stop) {
         String sql = "UPDATE stops SET name = ?, latitude = ?, longitude = ?, isActive = ? WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, stop.getName());
             stmt.setDouble(2, stop.getLatitude());
             stmt.setDouble(3, stop.getLongitude());
@@ -83,7 +94,9 @@ public class StopsRepositoryMYSQLAdapter implements StopsRepositoryPort {
     @Override
     public void deleteById(int id) {
         String sql = "DELETE FROM stops WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -94,7 +107,9 @@ public class StopsRepositoryMYSQLAdapter implements StopsRepositoryPort {
     @Override
     public Optional<Stops> findByName(String stopName) {
         String sql = "SELECT * FROM stops WHERE name = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, stopName);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) return Optional.of(mapRowToStop(rs));
@@ -108,8 +123,10 @@ public class StopsRepositoryMYSQLAdapter implements StopsRepositoryPort {
     public List<Stops> findAllActive() {
         List<Stops> stops = new ArrayList<>();
         String sql = "SELECT * FROM stops WHERE isActive = true";
-        try (Statement stmt = connection.createStatement()) {
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
             while (rs.next()) stops.add(mapRowToStop(rs));
         } catch (SQLException e) {
             throw new RuntimeException("Failed to find all active stops", e);
@@ -130,7 +147,9 @@ public class StopsRepositoryMYSQLAdapter implements StopsRepositoryPort {
               AND longitude BETWEEN ? AND ?
         """;
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setDouble(1, latitude - latDiff);
             stmt.setDouble(2, latitude + latDiff);
             stmt.setDouble(3, longitude - lonDiff);

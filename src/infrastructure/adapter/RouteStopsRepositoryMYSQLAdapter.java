@@ -3,23 +3,26 @@ package adapter;
 import domain.model.Route;
 import domain.model.RouteStops;
 import domain.model.Stops;
+import org.springframework.stereotype.Repository;
 import port.outbound.RouteStopsRepositoryPort;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPort {
 
-    private final Connection connection;
+    private final DataSource dataSource;
     private final RouteRepositoryMYSQLAdapter routeRepo;
     private final StopsRepositoryMYSQLAdapter stopsRepo;
 
-    public RouteStopsRepositoryMYSQLAdapter(Connection connection,
+    public RouteStopsRepositoryMYSQLAdapter(DataSource dataSource,
                                             RouteRepositoryMYSQLAdapter routeRepo,
                                             StopsRepositoryMYSQLAdapter stopsRepo) {
-        this.connection = connection;
+        this.dataSource = dataSource;
         this.routeRepo = routeRepo;
         this.stopsRepo = stopsRepo;
     }
@@ -29,7 +32,9 @@ public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPor
     public void create(RouteStops entity) {
         String sql = "INSERT INTO routeStops (routeId, stopId, routeOrder, timeFromStart, distanceFromPrevious) " +
                 "VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setInt(1, entity.getRoute().getId());
             stmt.setInt(2, entity.getStop().getId());
             stmt.setInt(3, entity.getRouteOrder());
@@ -38,25 +43,23 @@ public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPor
             stmt.executeUpdate();
 
             ResultSet keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                entity.setId(keys.getInt(1));
-            }
+            if (keys.next()) entity.setId(keys.getInt(1));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to create RouteStops", e);
         }
     }
 
     @Override
     public Optional<RouteStops> readById(int id) {
         String sql = "SELECT * FROM routeStops WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return Optional.of(mapRowToRouteStop(rs));
-            }
+            if (rs.next()) return Optional.of(mapRowToRouteStop(rs));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to read RouteStops by ID", e);
         }
         return Optional.empty();
     }
@@ -65,13 +68,13 @@ public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPor
     public List<RouteStops> readAll() {
         List<RouteStops> list = new ArrayList<>();
         String sql = "SELECT * FROM routeStops";
-        try (Statement stmt = connection.createStatement()) {
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                list.add(mapRowToRouteStop(rs));
-            }
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) list.add(mapRowToRouteStop(rs));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to read all RouteStops", e);
         }
         return list;
     }
@@ -80,7 +83,9 @@ public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPor
     public void update(RouteStops entity) {
         String sql = "UPDATE routeStops SET routeId = ?, stopId = ?, routeOrder = ?, timeFromStart = ?, distanceFromPrevious = ? " +
                 "WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, entity.getRoute().getId());
             stmt.setInt(2, entity.getStop().getId());
             stmt.setInt(3, entity.getRouteOrder());
@@ -89,7 +94,7 @@ public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPor
             stmt.setInt(6, entity.getId());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to update RouteStops", e);
         }
     }
 
@@ -101,11 +106,13 @@ public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPor
     @Override
     public void deleteById(int id) {
         String sql = "DELETE FROM routeStops WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to delete RouteStops", e);
         }
     }
 
@@ -118,13 +125,13 @@ public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPor
             JOIN stops s ON rs.stopId = s.id
             WHERE r.isActive = TRUE AND s.isActive = TRUE
         """;
-        try (Statement stmt = connection.createStatement()) {
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                list.add(mapRowToRouteStop(rs));
-            }
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            while (rs.next()) list.add(mapRowToRouteStop(rs));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to find all active RouteStops", e);
         }
         return list;
     }
@@ -133,14 +140,14 @@ public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPor
     public List<RouteStops> findByRoute(Route route) {
         List<RouteStops> list = new ArrayList<>();
         String sql = "SELECT * FROM routeStops WHERE routeId = ? ORDER BY routeOrder";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, route.getId());
             ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                list.add(mapRowToRouteStop(rs));
-            }
+            while (rs.next()) list.add(mapRowToRouteStop(rs));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to find RouteStops by Route", e);
         }
         return list;
     }
@@ -149,14 +156,14 @@ public class RouteStopsRepositoryMYSQLAdapter implements RouteStopsRepositoryPor
     public List<RouteStops> findByStop(Stops stop) {
         List<RouteStops> list = new ArrayList<>();
         String sql = "SELECT * FROM routeStops WHERE stopId = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, stop.getId());
             ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                list.add(mapRowToRouteStop(rs));
-            }
+            while (rs.next()) list.add(mapRowToRouteStop(rs));
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to find RouteStops by Stop", e);
         }
         return list;
     }

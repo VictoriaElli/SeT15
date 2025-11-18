@@ -1,8 +1,10 @@
 package adapter;
 
 import domain.model.*;
+import org.springframework.stereotype.Repository;
 import port.outbound.ExceptionEntryRepositoryPort;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,33 +12,36 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+@Repository
 public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepositoryPort {
 
-    private final Connection connection;
+    private final DataSource dataSource;
     private final RouteRepositoryMYSQLAdapter routeRepo;
     private final StopsRepositoryMYSQLAdapter stopsRepo;
     private final SeasonRepositoryMYSQLAdapter seasonRepo;
     private final OperationMessageRepositoryMYSQLAdapter msgRepo;
 
-    public ExceptionEntryRepositoryMYSQLAdapter(Connection connection,
+    public ExceptionEntryRepositoryMYSQLAdapter(DataSource dataSource,
                                                 RouteRepositoryMYSQLAdapter routeRepo,
                                                 StopsRepositoryMYSQLAdapter stopsRepo,
                                                 SeasonRepositoryMYSQLAdapter seasonRepo,
                                                 OperationMessageRepositoryMYSQLAdapter msgRepo) {
-        this.connection = connection;
+        this.dataSource = dataSource;
         this.routeRepo = routeRepo;
         this.stopsRepo = stopsRepo;
         this.seasonRepo = seasonRepo;
         this.msgRepo = msgRepo;
     }
 
-    // --- CRUD METHODS ---
+    // --- CRUD ---
     @Override
     public void create(ExceptionEntry entry) {
         String sql = "INSERT INTO exceptionEntry " +
                 "(routeId, stopId, validDate, weekday, seasonId, departureTime, type, isActive, operationMessageId) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setInt(1, entry.getRoute().getId());
             stmt.setObject(2, entry.getStop() != null ? entry.getStop().getId() : null);
             stmt.setDate(3, entry.getValidDate() != null ? java.sql.Date.valueOf(entry.getValidDate()) : null);
@@ -50,6 +55,7 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
 
             ResultSet keys = stmt.getGeneratedKeys();
             if (keys.next()) entry.setId(keys.getInt(1));
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -58,10 +64,12 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
     @Override
     public Optional<ExceptionEntry> readById(int id) {
         String sql = "SELECT * FROM exceptionEntry WHERE id=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, id);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) return Optional.of(mapRowToEntry(rs));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return Optional.of(mapRowToEntry(rs));
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -78,7 +86,9 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
     public void update(ExceptionEntry entry) {
         String sql = "UPDATE exceptionEntry SET routeId=?, stopId=?, validDate=?, weekday=?, seasonId=?, " +
                 "departureTime=?, type=?, isActive=?, operationMessageId=? WHERE id=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, entry.getRoute().getId());
             stmt.setObject(2, entry.getStop() != null ? entry.getStop().getId() : null);
             stmt.setDate(3, entry.getValidDate() != null ? java.sql.Date.valueOf(entry.getValidDate()) : null);
@@ -90,6 +100,7 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
             stmt.setObject(9, entry.getOperationMessage() != null ? entry.getOperationMessage().getId() : null);
             stmt.setInt(10, entry.getId());
             stmt.executeUpdate();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -103,7 +114,8 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
     @Override
     public void deleteById(int id) {
         String sql = "DELETE FROM exceptionEntry WHERE id=?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, id);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -111,7 +123,7 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
         }
     }
 
-    // --- Finn etter route ---
+    // --- FINN METODER ---
     @Override
     public List<ExceptionEntry> findByRoute(Route route) {
         if (route == null) return List.of();
@@ -139,7 +151,6 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
         });
     }
 
-    // --- Finn etter stop ---
     @Override
     public List<ExceptionEntry> findByStop(Stops stop) {
         if (stop == null) return List.of();
@@ -181,7 +192,14 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
         });
     }
 
-    // --- Finn alle på dato ---
+    @Override
+    public List<ExceptionEntry> findBySeason(Season season) {
+        if (season == null) return List.of();
+        String sql = "SELECT * FROM exceptionEntry WHERE seasonId=? ORDER BY departureTime";
+        return executeQueryList(sql, stmt -> stmt.setInt(1, season.getId()));
+    }
+
+    // --- HØYERE NIVÅ METODER (aktive/inaktive) ---
     @Override
     public List<ExceptionEntry> findAllOnDate(LocalDate date) {
         return findAllForDate(date,
@@ -206,7 +224,6 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
                 e -> !e.isActive());
     }
 
-    // --- Finn alle på ukedag ---
     @Override
     public List<ExceptionEntry> findAllOnWeekday(Weekday weekday) {
         return findAllForWeekday(weekday, wd -> findByRouteAndWeekday(null, wd), null);
@@ -222,7 +239,6 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
         return findAllForWeekday(weekday, wd -> findByRouteAndWeekday(null, wd), e -> !e.isActive());
     }
 
-    // --- Aktive/inaktive for route + dato ---
     @Override
     public List<ExceptionEntry> findActiveForRouteAndDate(Route route, LocalDate date) {
         return findAllForDate(date, d -> findByRouteAndDate(route, d), wd -> findByRouteAndWeekday(route, wd), ExceptionEntry::isActive);
@@ -233,7 +249,6 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
         return findAllForDate(date, d -> findByRouteAndDate(route, d), wd -> findByRouteAndWeekday(route, wd), e -> !e.isActive());
     }
 
-    // --- Aktive/inaktive for stop + dato ---
     @Override
     public List<ExceptionEntry> findActiveForStopAndDate(Stops stop, LocalDate date) {
         return findAllForDate(date, d -> findByStopAndDate(stop, d), wd -> findByStopAndWeekday(stop, wd), ExceptionEntry::isActive);
@@ -244,7 +259,6 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
         return findAllForDate(date, d -> findByStopAndDate(stop, d), wd -> findByStopAndWeekday(stop, wd), e -> !e.isActive());
     }
 
-    // --- Aktive/inaktive for route + ukedag ---
     @Override
     public List<ExceptionEntry> findActiveForRouteAndWeekday(Route route, Weekday weekday) {
         return findAllForWeekday(weekday, wd -> findByRouteAndWeekday(route, wd), ExceptionEntry::isActive);
@@ -255,7 +269,6 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
         return findAllForWeekday(weekday, wd -> findByRouteAndWeekday(route, wd), e -> !e.isActive());
     }
 
-    // --- Aktive/inaktive for stop + ukedag ---
     @Override
     public List<ExceptionEntry> findActiveForStopAndWeekday(Stops stop, Weekday weekday) {
         return findAllForWeekday(weekday, wd -> findByStopAndWeekday(stop, wd), ExceptionEntry::isActive);
@@ -266,15 +279,7 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
         return findAllForWeekday(weekday, wd -> findByStopAndWeekday(stop, wd), e -> !e.isActive());
     }
 
-    // --- Finn etter season ---
-    @Override
-    public List<ExceptionEntry> findBySeason(Season season) {
-        if (season == null) return List.of();
-        String sql = "SELECT * FROM exceptionEntry WHERE seasonId=? ORDER BY departureTime";
-        return executeQueryList(sql, stmt -> stmt.setInt(1, season.getId()));
-    }
-
-    // --- HELPER METHODS ---
+    // --- HJELPEMETODER ---
     private List<ExceptionEntry> findAllForDate(
             LocalDate date,
             Function<LocalDate, List<ExceptionEntry>> byDateFetcher,
@@ -317,6 +322,7 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
 
         java.sql.Date sqlDate = rs.getDate("validDate");
         LocalDate validDate = sqlDate != null ? sqlDate.toLocalDate() : null;
+
         String weekdayStr = rs.getString("weekday");
         Weekday weekday = weekdayStr != null ? Weekday.valueOf(weekdayStr) : null;
 
@@ -350,7 +356,8 @@ public class ExceptionEntryRepositoryMYSQLAdapter implements ExceptionEntryRepos
 
     private List<ExceptionEntry> executeQueryList(String sql, SQLConsumer<PreparedStatement> setter) {
         List<ExceptionEntry> list = new ArrayList<>();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
             if (setter != null) setter.accept(stmt);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) list.add(mapRowToEntry(rs));
