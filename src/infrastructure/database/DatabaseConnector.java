@@ -1,47 +1,54 @@
 package database;
 
-import domain.model.util.DotenvUtil;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import exception.MySQLDatabaseException;
+import io.github.cdimascio.dotenv.Dotenv;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.io.IOException;
+import javax.sql.DataSource;
 
 public class DatabaseConnector {
 
+    private static HikariDataSource dataSource;
 
-    // Metode for å etablere en tilkobling
-    public static Connection connect() throws SQLException, IOException, MySQLDatabaseException {
-        DotenvUtil dotenv = new DotenvUtil("src/resources/database.env");
+    public static void init() {
+        if (dataSource != null) return; // allerede initialisert
+
+        // Leser .env
+        Dotenv dotenv = Dotenv.configure()
+                .directory("src/resources")
+                .filename("database.env")
+                .ignoreIfMalformed()
+                .ignoreIfMissing()
+                .load();
 
         String dbHost = dotenv.get("DB_HOST");
         String dbPort = dotenv.get("DB_PORT");
         String dbName = dotenv.get("DB_NAME");
-        String dbUsername = dotenv.get("DB_USER");
+        String dbUser = dotenv.get("DB_USER");
         String dbPassword = dotenv.get("DB_PASSWORD");
 
-        String dbUrl = String.format("jdbc:mysql://%s:%s/%s", dbHost, dbPort, dbName);
+        if (dbHost == null || dbPort == null || dbName == null || dbUser == null || dbPassword == null) {
+            throw new MySQLDatabaseException("Database credentials missing in .env", null);
+        }
 
-        MySQLDatabase mysqlDatabase = new MySQLDatabase(dbUrl, dbUsername, dbPassword);
-        return mysqlDatabase.startDB();
+        String jdbcUrl = String.format("jdbc:mysql://%s:%s/%s?useSSL=false&serverTimezone=UTC",
+                dbHost, dbPort, dbName);
+
+        try {
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(jdbcUrl);
+            config.setUsername(dbUser);
+            config.setPassword(dbPassword);
+
+            dataSource = new HikariDataSource(config);
+        } catch (Exception e) {
+            throw new MySQLDatabaseException("Failed to initialize HikariCP DataSource", e);
+        }
     }
 
-    // Metode for å lese data fra databasen
-    public static void readData(String query) {
-        try (Connection connection = connect();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            while (rs.next()) {
-                String column1 = rs.getString("id");
-                String column2 = rs.getString("name");
-                System.out.println(column1 + " | " + column2);
-            }
-
-        } catch (SQLException | IOException | MySQLDatabaseException e) {
-            e.printStackTrace();
-        }
+    public static DataSource getDataSource() {
+        if (dataSource == null) init();
+        return dataSource;
     }
 }
