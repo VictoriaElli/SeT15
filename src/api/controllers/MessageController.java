@@ -2,7 +2,7 @@ package controllers;
 
 import domain.model.OperationMessage;
 import domain.model.Route;
-import domain.service.OperationMessageService;
+import service.OperationMessageService;
 import domain.service.RouteService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;

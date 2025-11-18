@@ -1,18 +1,37 @@
 package domain.model;
 
 /**
- * Enum representing different types of exceptions or status updates for routes or services.
+ * Representerer type unntak eller statusendring for ruter eller avganger.
+ *
+ * Brukes i {@link ExceptionEntry} for å angi hva slags avvik som gjelder:
+ * - ekstra avganger
+ * - forsinkelser
+ * - kanselleringer
+ * - utelatelser fra ruteplanen
  */
 public enum ExceptionType {
-    // An extra departure or an unscheduled route
+
+    /**
+     * Ekstra avganger eller uplanlagte ruter som legges til.
+     * Typisk brukt når det kjøres flere avganger enn normalt på en dag.
+     */
     EXTRA,
 
-    // A delayed departure or an extended wait
+    /**
+     * Forsinket avgang eller lengre ventetid enn planlagt.
+     * Brukes for å indikere at avgangen ikke går på planlagt tidspunkt.
+     */
     DELAYED,
 
-    // A cancelled departure or route
+    /**
+     * Kansellert avgang eller rute.
+     * Angir at den planlagte avgangen ikke gjennomføres.
+     */
     CANCELLED,
 
-    // A departure or route omitted from the schedule
+    /**
+     * Utelatt avgang eller rute fra ruteplanen.
+     * Skiller seg fra CANCELLED ved at avgangen kanskje aldri var planlagt på denne dagen.
+     */
     OMITTED
 }
