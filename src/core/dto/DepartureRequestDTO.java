@@ -1,5 +1,6 @@
 package dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import domain.model.TimeMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -9,11 +10,16 @@ public class DepartureRequestDTO {
 
     private String fromStop;
     private String toStop;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate travelDate;
+
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime travelTime;
     private TimeMode timeMode;
 
     // --- Constructor ---
+    public DepartureRequestDTO(){}
     public DepartureRequestDTO(String fromStop, String toStop, LocalDate travelDate,
                                LocalTime travelTime, TimeMode timeMode) {
         this.fromStop = fromStop;
