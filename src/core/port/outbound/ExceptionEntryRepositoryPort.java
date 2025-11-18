@@ -5,10 +5,12 @@ import domain.model.Route;
 import domain.model.Season;
 import domain.model.Stops;
 import domain.model.Weekday;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Repository
 public interface ExceptionEntryRepositoryPort extends CRUDRepositoryPort<ExceptionEntry> {
 
     // --- Finn etter route ---

@@ -2,11 +2,12 @@ package port.outbound;
 
 import domain.model.OperationMessage;
 import domain.model.Route;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
+@Repository
 public interface OperationMessageRepositoryPort extends CRUDRepositoryPort<OperationMessage> {
 
     // --- Finn alle meldinger for en rute ---

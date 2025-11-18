@@ -4,10 +4,12 @@ import domain.model.Frequency;
 import domain.model.Route;
 import domain.model.Season;
 import domain.model.Weekday;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Repository
 public interface FrequencyRepositoryPort extends CRUDRepositoryPort<Frequency> {
     List<Frequency> findByRoute(Route route);
     List<Frequency> findByRouteAndDate(Route route, LocalDate date);
