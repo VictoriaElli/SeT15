@@ -3,18 +3,28 @@ package domain.model;
 import java.time.LocalDate;
 import java.time.DayOfWeek;
 
+/**
+ * Representerer ukedager som enum.
+ *
+ * Brukes for å knytte frekvenser eller unntak til spesifikke ukedager.
+ * Inkluderer hjelpefunksjon for å konvertere fra {@link LocalDate}.
+ */
 public enum Weekday {
-    MONDAY,
-    TUESDAY,
-    WEDNESDAY,
-    THURSDAY,
-    FRIDAY,
-    SATURDAY,
-    SUNDAY;
+    MONDAY,     // Mandag
+    TUESDAY,    // Tirsdag
+    WEDNESDAY,  // Onsdag
+    THURSDAY,   // Torsdag
+    FRIDAY,     // Fredag
+    SATURDAY,   // Lørdag
+    SUNDAY;     // Søndag
 
-    // Utility method to convert LocalDate to Weekday
+    /**
+     * Konverterer en {@link LocalDate} til tilsvarende {@link Weekday}.
+     *
+     * @param date Dato som skal konverteres
+     * @return Ukedag som matcher datoen
+     */
     public static Weekday fromLocalDate(LocalDate date) {
-        // Get the DayOfWeek enum from LocalDate and map it to the Weekday enum.
         DayOfWeek dayOfWeek = date.getDayOfWeek();
 
         switch (dayOfWeek) {

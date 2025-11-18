@@ -1,7 +1,5 @@
 package port;
 
-
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import domain.model.environment.DistanceBetweenStops;
 
@@ -66,7 +64,5 @@ public class ferryRoutesJSONRepository implements ferryRoutesRepository {
         return new ArrayList<>();
 
     }
-
-
 
 }

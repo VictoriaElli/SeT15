@@ -1,57 +1,54 @@
 package database;
 
-import domain.model.util.DotenvUtil;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import exception.MySQLDatabaseException;
+import io.github.cdimascio.dotenv.Dotenv;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.io.IOException;
+import javax.sql.DataSource;
 
 public class DatabaseConnector {
 
-    // Metode for å etablere en tilkobling til databasen
-    public static Connection connect() throws SQLException, IOException {
-        // Opprett Dotenv-objekt og last inn .env-filen for å hente miljøvariabler
-        DotenvUtil dotenv = new DotenvUtil("database.env");
+    private static HikariDataSource dataSource;
 
-        // Hent nødvendige konfigurasjoner fra miljøvariablene (fra .env-filen)
-        String dbHost = dotenv.get("DB_HOST"); // Hent verten for databasen
-        String dbPort = dotenv.get("DB_PORT"); // Hent porten for databasen
-        String dbName = dotenv.get("DB_NAME"); // Hent databasenavnet
-        String dbUsername = dotenv.get("DB_USER"); // Hent brukernavnet for databasen
-        String dbPassword = dotenv.get("DB_PASSWORD"); // Hent passordet for databasen
+    public static void init() {
+        if (dataSource != null) return; // allerede initialisert
 
-        // Logg miljøvariabler for debugging. Husk å fjerne logging i produksjon for å unngå lekkasje av sensitiv informasjon
-        System.out.println("Connecting to DB:");
-        System.out.println("Host: " + dbHost);
-        System.out.println("Port: " + dbPort);
-        System.out.println("Database: " + dbName);
-        System.out.println("Username: " + dbUsername);
+        // Leser .env
+        Dotenv dotenv = Dotenv.configure()
+                .directory("src/resources")
+                .filename("database.env")
+                .ignoreIfMalformed()
+                .ignoreIfMissing()
+                .load();
 
-        // Bygg database-URL dynamisk basert på de hentede miljøvariablene
-        String dbUrl = String.format("jdbc:mysql://%s:%s/%s", dbHost, dbPort, dbName);
+        String dbHost = dotenv.get("DB_HOST");
+        String dbPort = dotenv.get("DB_PORT");
+        String dbName = dotenv.get("DB_NAME");
+        String dbUser = dotenv.get("DB_USER");
+        String dbPassword = dotenv.get("DB_PASSWORD");
 
-        // Forsøk å opprette en tilkobling til databasen og returner forbindelsen
+        if (dbHost == null || dbPort == null || dbName == null || dbUser == null || dbPassword == null) {
+            throw new MySQLDatabaseException("Database credentials missing in .env", null);
+        }
+
+        String jdbcUrl = String.format("jdbc:mysql://%s:%s/%s?useSSL=false&serverTimezone=UTC",
+                dbHost, dbPort, dbName);
+
         try {
-            Connection connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
-            System.out.println("Database connection successful!"); // Bekreft at tilkoblingen er vellykket
-            return connection;
-        } catch (SQLException e) {
-            System.err.println("Database connection failed: " + e.getMessage()); // Feilhåndtering ved tilkoblingsfeil
-            throw e;  // Kast unntaket videre slik at det kan fanges opp i testene
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(jdbcUrl);
+            config.setUsername(dbUser);
+            config.setPassword(dbPassword);
+
+            dataSource = new HikariDataSource(config);
+        } catch (Exception e) {
+            throw new MySQLDatabaseException("Failed to initialize HikariCP DataSource", e);
         }
     }
 
-    // Main-metode for å teste tilkoblingen
-    public static void main(String[] args) {
-        // Bruk try-with-resources for automatisk å lukke tilkoblingen etter bruk
-        try (Connection connection = connect()) {
-            if (connection != null) {
-                // Hvis tilkoblingen er vellykket, vis melding i konsollen
-                System.out.println("Database connection successful!");
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace(); // Skriv ut feil dersom tilkoblingen mislykkes
-        }
+    public static DataSource getDataSource() {
+        if (dataSource == null) init();
+        return dataSource;
     }
 }
