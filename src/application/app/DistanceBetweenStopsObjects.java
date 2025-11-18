@@ -1,7 +1,7 @@
-package domain.model.environment;
+package app;
 
-import port.ferryRoutesJSONRepository;
 import domain.model.environment.DistanceBetweenStops;
+import port.outbound.ferryRoutesJSONRepository;
 
 
 import java.io.File;
