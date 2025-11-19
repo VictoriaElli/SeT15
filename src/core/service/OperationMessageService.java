@@ -8,7 +8,6 @@ import port.outbound.OperationMessageRepositoryPort;
 import port.outbound.RouteRepositoryPort;
 
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,10 +24,8 @@ public class OperationMessageService {
     private final OperationMessageRepositoryPort messageRepo;
     private final RouteRepositoryPort routeRepo;
 
-    // Dette er konstruktøren som gjør klar repository for service
-    public OperationMessageService(
-            @Qualifier("operationMessageRepositoryMYSQLAdapter") OperationMessageRepositoryPort messageRepo,
-            @Qualifier("routeRepositoryMYSQLAdapter") RouteRepositoryPort routeRepo) {
+    public OperationMessageService(OperationMessageRepositoryPort messageRepo,
+                                   RouteRepositoryPort routeRepo) {
         this.messageRepo = messageRepo;
         this.routeRepo = routeRepo;
     }
