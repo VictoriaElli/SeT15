@@ -16,6 +16,8 @@ public class DepartureResponseDTO {
     private LocalTime arrivalTime;
     private int delayMinutes;
     private String operationMessage;
+    private EnvironmentDTO environmentSavings;
+
 
     public DepartureResponseDTO() {}
 
@@ -48,6 +50,10 @@ public class DepartureResponseDTO {
     public LocalTime getArrivalTime() { return arrivalTime; }
     public int getDelayMinutes() { return delayMinutes; }
     public String getOperationMessage() { return operationMessage; }
+    public EnvironmentDTO getEnvironmentSavings() {
+        return environmentSavings;
+    }
+
 
     // --- Settere ---
     public void setRouteNumber(int routeNumber) {this.routeNumber = routeNumber;}
@@ -59,4 +65,8 @@ public class DepartureResponseDTO {
     public void setArrivalTime(LocalTime arrivalTime) { this.arrivalTime = arrivalTime; }
     public void setDelayMinutes(int delayMinutes) { this.delayMinutes = delayMinutes; }
     public void setOperationMessage(String operationMessage) { this.operationMessage = operationMessage; }
+
+    public void setEnvironmentSavings(EnvironmentDTO environmentSavings) {
+        this.environmentSavings = environmentSavings;
+    }
 }

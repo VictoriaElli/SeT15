@@ -1,9 +1,11 @@
 package domain.model.environment;
 
-public class DistanceBetweenStops {
+import domain.model.Stops;
 
-    private String from;
-    private String destination;
+public class DistanceBetweenStops {
+    private int id;
+    private Stops fromStop;
+    private Stops toStop;
     private double distance;
     private boolean tollgate;
     private double emissionSaved;
@@ -11,9 +13,21 @@ public class DistanceBetweenStops {
 
 
     // Konstruktør
-    public DistanceBetweenStops(String from, String destination, double distance, boolean tollgate) {
-        this.from = from;
-        this.destination = destination;
+    public DistanceBetweenStops(Stops from, Stops toStop, double distance, boolean tollgate) {
+        this.fromStop = from;
+        this.toStop = toStop;
+        this.distance = distance;
+        this.tollgate = tollgate;
+
+        // Funksjonene som skal være med på JSON-formatet
+        this.emissionSaved = emissionSaved();
+        this.costSaved = costSaved();
+    }
+
+    public DistanceBetweenStops(int id, Stops from, Stops toStop, double distance, boolean tollgate) {
+        this.id = id;
+        this.fromStop = from;
+        this.toStop = toStop;
         this.distance = distance;
         this.tollgate = tollgate;
 
@@ -58,20 +72,29 @@ public class DistanceBetweenStops {
 
     // Gettere og settere
 
-    public String getFrom() {
-        return from;
+
+    public int getId() {
+        return id;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getDestination() {
-        return destination;
+    public Stops getFromStop() {
+        return fromStop;
     }
 
-    public void setDestination(String destination) {
-        this.destination = destination;
+    public void setFromStop(Stops fromStop) {
+        this.fromStop = fromStop;
+    }
+
+    public Stops getToStop() {
+        return toStop;
+    }
+
+    public void setToStop(Stops toStop) {
+        this.toStop = toStop;
     }
 
     public double getDistance() {

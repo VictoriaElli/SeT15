@@ -8,7 +8,7 @@ public class EnvironmentCalculator {
     public static void calculateWhatYouHaveSaved(DistanceBetweenStops distanceBetweenStops) {
 
         // Skriver ut ruta
-        System.out.println("På ruten " + distanceBetweenStops.getFrom() + "-" + distanceBetweenStops.getDestination() + " har du spart:");
+        System.out.println("På ruten " + distanceBetweenStops.getFromStop() + "-" + distanceBetweenStops.getToStop() + " har du spart:");
 
         // Skriver ut hvor mye penger som totalt er spart i nærmeste heltall
 

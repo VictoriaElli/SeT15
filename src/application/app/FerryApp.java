@@ -3,8 +3,13 @@ package app;
 import database.DatabaseConnector;
 import domain.model.*;
 import adapter.*;
+import dto.DepartureRequestDTO;
+import dto.DepartureResponseDTO;
 import exception.MySQLDatabaseException;
-import service.ScheduleServiceWithoutDTO;
+import port.outbound.StopDistanceRepositoryPort;
+import port.outbound.StopsRepositoryPort;
+import service.EnvironmentService;
+import service.ScheduleService;
 import dto.DepartureDTO;
 
 import javax.sql.DataSource;
@@ -28,13 +33,17 @@ public class FerryApp {
             RouteStopsRepositoryMYSQLAdapter routeStopsRepo = new RouteStopsRepositoryMYSQLAdapter(dataSource, routeRepo, stopsRepo);
             FrequencyRepositoryMYSQLAdapter frequencyRepo = new FrequencyRepositoryMYSQLAdapter(dataSource, routeRepo, seasonRepo);
             ExceptionEntryRepositoryMYSQLAdapter exceptionRepo = new ExceptionEntryRepositoryMYSQLAdapter(dataSource, routeRepo, stopsRepo, seasonRepo, msgRepo);
+            StopDistanceRepositoryMYSQLAdapter stopsDistanceRepo = new StopDistanceRepositoryMYSQLAdapter(dataSource, stopsRepo);
+            EnvironmentService environmentService = new EnvironmentService(stopsDistanceRepo);
 
             // --- ScheduleService ---
-            ScheduleServiceWithoutDTO scheduleService = new ScheduleServiceWithoutDTO(
+            ScheduleService scheduleService = new ScheduleService(
                     routeRepo,
                     routeStopsRepo,
                     frequencyRepo,
-                    exceptionRepo
+                    exceptionRepo,
+                    stopsRepo,
+                    environmentService
             );
 
             // --- Hent alle stops ---
@@ -104,20 +113,21 @@ public class FerryApp {
                 }
 
                 // --- Hent avganger ---
-                List<DepartureDTO> departures = scheduleService.getDepartures(fromStop, toStop, date, time, timeMode);
+                List<DepartureResponseDTO> departures = scheduleService.getDepartures(new DepartureRequestDTO(fromStop.getName(), toStop.getName(), date, time, timeMode));
 
                 System.out.println("\n=== Departures from " + fromStop.getName() + " to " + toStop.getName() + " ===");
                 if (departures.isEmpty()) {
                     System.out.println("No departures found.");
                 } else {
-                    for (DepartureDTO d : departures) {
+                    for (DepartureResponseDTO d : departures) {
                         System.out.printf(
-                                "%d | %s -> %s | Departs %s | Arrives %s\n",
+                                "%d | %s -> %s | Departs %s | Arrives %s | %s\n",
                                 d.getRouteNumber(),
                                 d.getFromStopName(),
                                 d.getToStopName(),
                                 d.getPlannedDeparture(),
-                                d.getArrivalTime()
+                                d.getArrivalTime(),
+                                d.getEnvironmentSavings()
                         );
                     }
                 }

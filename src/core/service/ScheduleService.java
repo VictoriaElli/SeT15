@@ -15,14 +15,16 @@ import java.util.List;
 public class ScheduleService extends BaseScheduleService {
 
     private final StopsRepositoryPort stopsRepo;
+    private final EnvironmentService environmentService;
 
     public ScheduleService(RouteRepositoryPort routeRepo,
                            RouteStopsRepositoryPort routeStopsRepo,
                            FrequencyRepositoryPort frequencyRepo,
                            ExceptionEntryRepositoryPort exceptionRepo,
-                           StopsRepositoryPort stopsRepo) {
+                           StopsRepositoryPort stopsRepo, EnvironmentService environmentService) {
         super(routeRepo, routeStopsRepo, frequencyRepo, exceptionRepo);
         this.stopsRepo = stopsRepo;
+        this.environmentService = environmentService;
     }
 
     public List<DepartureResponseDTO> getDepartures(DepartureRequestDTO request) {
@@ -52,9 +54,18 @@ public class ScheduleService extends BaseScheduleService {
 
         List<DepartureResponseDTO> response = new ArrayList<>();
         for (DepartureDTO dto : departures) {
-            response.add(new DepartureResponseDTO(dto, request.getTimeMode()));
+            DepartureResponseDTO respDTO = new DepartureResponseDTO(dto, request.getTimeMode());
+
+            // Hent miljødata
+            try {
+                respDTO.setEnvironmentSavings(environmentService.calculateSavings(fromStop.getId(), toStop.getId()));
+            } catch (RuntimeException e) {
+                respDTO.setEnvironmentSavings(null); // <- her settes det null hvis route == null
+            }
+
+
+            response.add(respDTO);
         }
         return response;
     }
-
 }
