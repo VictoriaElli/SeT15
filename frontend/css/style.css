@@ -1,0 +1,460 @@
+/* ==========================
+   Reset / Body
+========================== */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ==========================
+   Header
+========================== */
+header {
+  background-color: #ed1d23;
+  color: white;
+  padding: 3rem;
+  text-align: center;
+}
+
+.logo {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ==========================
+   Container
+========================== */
+.container {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px;
+  background: white;
+  box-sizing: border-box;
+}
+
+h1, h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+/* ==========================
+   Seksjoner
+========================== */
+
+#travelPlanner, #routeDetails, #resultsSection {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-sizing: border-box;
+}
+
+
+
+/* ==========================
+   Button
+========================== */
+button {
+  cursor: pointer;
+  margin-top: 20px;
+  padding: 12px;
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* ==========================
+   Skjema / Input
+========================== */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* avstand mellom feltene */
+}
+
+label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+select {
+  appearance: none; /* fjerner default pil */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #fff; /* hvit bakgrunn */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'><path fill='%23999' d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="time"]
+{
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+  outline: none;
+}
+
+/* ==========================
+   Time Mode / Radio Buttons
+========================== */
+.timeModeContainer {
+  display: flex;
+  gap: 10px;
+  align-items: stretch; /* gjør alle like høye */
+  margin-top: 10px;
+  width: 100%;
+}
+
+/* NÅ-knapp */
+input#now {
+  display: none;
+}
+
+.time-btn {
+  flex-shrink: 0;
+  padding: 0 20px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;   /* sentrerer teksten vertikalt */
+  justify-content: center;
+  transition: all 0.2s;
+  height: 44px;          /* fast høyde */
+  margin: 0;
+}
+
+input#now:checked + .time-btn {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+}
+
+/* Toggle for Avreise / Ankomst */
+.toggle-btn-group {
+  position: relative;
+  display: flex;
+  flex: 1; /* fyller resten av raden */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 200px;
+  height: 44px;           /* samme høyde som NÅ-knapp */
+}
+
+/* skjul radio inputs */
+.toggle-btn-group input {
+  display: none;
+}
+
+/* labels for toggle */
+.toggle-btn-group label {
+  flex: 1;
+  display: flex;
+  align-items: center;   /* vertikalt sentrert */
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  z-index: 2;
+  transition: color 0.2s;
+  margin: 0;
+  height: 100%;          /* fyller hele toggle-høyden */
+}
+
+/* glideindikator */
+.toggle-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background-color: #007bff;
+  border-radius: 6px;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+/* flytt glideindikator */
+#depart:checked ~ label[for="depart"] ~ .toggle-indicator {
+  transform: translateX(0%);
+}
+
+#arrival:checked ~ label[for="arrival"] ~ .toggle-indicator {
+  transform: translateX(100%);
+}
+
+/* aktiv label farge */
+#depart:checked ~ label[for="depart"],
+#arrival:checked ~ label[for="arrival"] {
+  color: white;
+}
+
+/* skjul glideindikator hvis NÅ er valgt */
+#now:checked ~ .toggle-btn-group .toggle-indicator {
+  opacity: 0;
+}
+
+
+/* ==========================
+   Resultater - kort
+========================== */
+#results ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#results li {
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  /* Fjern flex-wrap */
+  flex-wrap: nowrap;
+
+  /* Fjern gap her, bruk margin inne i children om nødvendig */
+  gap: 0;
+
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+
+#results li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+#results li .left {
+  display: flex;
+  flex-direction: row; /* rutenummer og stopp ved siden av hverandre */
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto; /* tar tilgjengelig plass */
+  min-width: 150px;
+}
+
+#results li .route {
+  font-weight: bold;
+  color: #004080;
+  min-width: 50px;
+}
+
+#results li .stops {
+  white-space: nowrap; /* hindrer linjeskift */
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+#results li .right {
+  display: flex;
+  flex-direction: column; /* avreise og ankomst under hverandre */
+  text-align: right;
+  flex: 0 0 auto;
+  min-width: 120px;
+}
+
+#results li .times {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* ==========================
+   Detaljside
+========================== */
+#routeDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#routeDetails h2 {
+  color: #004080;
+}
+
+#routeDetails p {
+  font-size: 16px;
+  color: #333;
+  margin: 8px 0;
+}
+
+#routeDetails p strong {
+  font-weight: 600;
+}
+
+#detailsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#detailsContent .environment {
+  color: #2ecc71; /* grønn for miljøgevinst */
+  font-weight: bold;
+  font-size: 16px;
+  background-color: rgba(46, 204, 113, 0.1);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #2ecc71;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#detailsContent .environment:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(46,204,113,0.3);
+}
+
+/* Tilbake-knapp */
+.backBtn {
+  margin: 1rem 0;
+  padding: 12px;
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.backBtn:hover {
+  background-color: #0056b3;
+}
+
+
+/* ==========================
+   Footer
+========================== */
+footer {
+  flex-shrink: 0;
+  background-color: #ed1d23;
+  color: white;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.footer-icons {
+  display: flex;
+  justify-content: center;
+  gap: 69px;
+  align-items: center;
+  position: relative;
+}
+
+.footer-icons .nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px 18px;
+  color: white;
+}
+
+.footer-icons .nav-link svg {
+  display: block;
+  pointer-events: none;
+}
+
+/* Glidende understrek */
+.footer-underline {
+  position: absolute;
+  height: 3px;
+  background: rgba(255,255,255,0.95);
+  bottom: 4px;
+  left: 0;
+  width: 0;
+  border-radius: 2px;
+  transition: transform 220ms cubic-bezier(.2,.9,.3,1), width 220ms ease, left 220ms ease;
+  will-change: left, width, transform;
+  pointer-events: none;
+}
+
+.footer-icons .nav-link:hover svg,
+.footer-icons .nav-link:focus-visible svg {
+  filter: brightness(1.05);
+}
+
+.footer-icons .nav-link:focus-visible {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.12);
+}
+
+/* ==========================
+   Misc
+========================== */
+.hidden {
+  display: none !important;
+}

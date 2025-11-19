@@ -59,6 +59,10 @@ public class Route {
         this.isActive = isActive;
     }
 
+    public Route(int id) {
+        this.id = id;
+    }
+
 
     // --- Metoder ---
 
