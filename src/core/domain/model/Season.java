@@ -1,43 +1,71 @@
-package core.domain.model;
+package domain.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Objects;
 
-// representerer en sesong i ruteplanleggingen, eksempel "Vinter 2025"
+/**
+ * Representerer en sesong i ruteplanlegging, f.eks. "Vinter 2025".
+ * Inneholder informasjon om type sesong, gyldighetsår og start/slutt-datoer.
+ */
+@Entity
 public class Season {
-    private int id;
-    private String seasonType;
-    private int year;
-    private LocalDate startDate;
-    private LocalDate endDate;
 
-    // Constructors
-    // brukes når sesongen allerede finnes i systemet.
-    public Season(int id, String seasonType, int year, LocalDate startDate, LocalDate endDate) {
+    // --- Felt ---
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private int id;                     // Unik ID generert av databasen
+
+    @Column(name = "seasonType")
+    private String seasonType;          // Type sesong, f.eks. "Vinter" eller "Sommer"
+
+    @Column(name = "validYear")
+    private int validYear;              // År sesongen gjelder (f.eks. 2025)
+
+    @Column(name = "startDate")
+    private LocalDate startDate;        // Startdato for sesongen
+
+    @Column(name = "endDate")
+    private LocalDate endDate;          // Sluttdato for sesongen
+
+    // --- Konstruktører ---
+
+    /**
+     * Full konstruktør for eksisterende sesjon med ID.
+     */
+    public Season(int id, String seasonType, int validYear, LocalDate startDate, LocalDate endDate) {
         this.id = id;
         this.seasonType = seasonType;
-        setYear(year);
+        setValidYear(validYear);
         setStartDate(startDate);
         setEndDate(endDate);
     }
 
-    // brukes for å opprette en ny sesong uten ID.
-    public Season(String seasonType, int year, LocalDate startDate, LocalDate endDate) {
+    /**
+     * Konstruktør for ny sesong uten ID (ID genereres av databasen).
+     */
+    public Season(String seasonType, int validYear, LocalDate startDate, LocalDate endDate) {
         this.seasonType = seasonType;
-        setYear(year);
+        setValidYear(validYear);
         setStartDate(startDate);
         setEndDate(endDate);
     }
 
-    // Methods
-    // sjekker om dato er innenfor sesong
+    // --- Metoder ---
+
+    /**
+     * Returnerer true hvis en gitt dato faller innenfor sesongens periode.
+     */
     public boolean isActiveOn(LocalDate date) {
         if (startDate == null || endDate == null) return false;
         return (!date.isBefore(startDate) && !date.isAfter(endDate));
     }
 
-
-    // sjekker overlapp med annen sesong
+    /**
+     * Sjekker om denne sesongen overlapper med en annen sesong.
+     */
     public boolean overlapsWith(Season other) {
         if (startDate == null || endDate == null ||
                 other.startDate == null || other.endDate == null) return false;
@@ -45,20 +73,23 @@ public class Season {
         return !endDate.isBefore(other.startDate) && !startDate.isAfter(other.endDate);
     }
 
-
-    // lesbar ID
+    /**
+     * Returnerer en enkel identifikator på format "{seasonType}-{validYear}".
+     */
     public String getIdentifier() {
-        return seasonType + "-" + year;
+        return seasonType + "-" + validYear;
     }
 
+    // --- Validering ---
 
-    // validering av år, startdato og sluttdato. sikrer at startdato tilhører samme år som "year"-feltet,
-    // og at startdato er før eller lik sluttdato.
+    /**
+     * Sjekker at startdato og sluttdato matcher året og at startdato ikke er etter sluttdato.
+     */
     private void validateDatesMatchYear() {
-        if (year == 0) return;
+        if (validYear == 0) return;
 
-        if (startDate != null && startDate.getYear() != year) {
-            throw new IllegalArgumentException("Start Date must be in the same year as the 'year' field");
+        if (startDate != null && startDate.getYear() != validYear) {
+            throw new IllegalArgumentException("Start Date must match year");
         }
 
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
@@ -66,41 +97,29 @@ public class Season {
         }
     }
 
-    // Getters
-    public int getId() {
-        return id;
-    }
+    // --- Gettere ---
 
-    public String getSeasonType() {
-        return seasonType;
-    }
+    public int getId() { return id; }
 
-    public int getYear() {
-        return year;
-    }
+    public String getSeasonType() { return seasonType; }
 
-    public LocalDate getStartDate() {
-        return startDate;
-    }
+    public int getValidYear() { return validYear; }
 
-    public LocalDate getEndDate() {
-        return endDate;
-    }
+    public LocalDate getStartDate() { return startDate; }
 
-    // Setters
-    public void setId(int id) {
-        this.id = id;
-    }
+    public LocalDate getEndDate() { return endDate; }
 
-    public void setSeasonType(String seasonType) {
-        this.seasonType = seasonType;
-    }
+    // --- Settere ---
 
-    public void setYear(int year) {
-        if (year < 2000 || year > 2100) {
+    public void setId(int id) { this.id = id; }
+
+    public void setSeasonType(String seasonType) { this.seasonType = seasonType; }
+
+    public void setValidYear(int validYear) {
+        if (validYear < 2000 || validYear > 2100) {
             throw new IllegalArgumentException("Year must be between 2000 and 2100");
         }
-        this.year = year;
+        this.validYear = validYear;
         validateDatesMatchYear();
     }
 
@@ -114,30 +133,37 @@ public class Season {
         validateDatesMatchYear();
     }
 
-    // Overrides
-    //returnerer lesbar representasjon av sesongen.
+    // --- Overrides ---
+
+    /**
+     * Returnerer en lesbar representasjon av sesongen:
+     *  "Season[id=1, Vinter 2025, 2025-01-01 - 2025-04-01]"
+     */
     @Override
     public String toString() {
         return String.format("Season[id=%d, %s %d, %s - %s]",
-                id, seasonType, year,
-                startDate != null ? startDate.toString() : "ukjent",
-                endDate != null ? endDate.toString() : "ukjent");
+                id, seasonType, validYear,
+                startDate != null ? startDate : "ukjent",
+                endDate != null ? endDate : "ukjent");
     }
 
-    // to sesonger regnes som like om de har samme type og år.
+    /**
+     * To sesonger er like hvis de har samme type og år.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Season)) return false;
         Season season = (Season) o;
-        return year == season.year &&
+        return validYear == season.validYear &&
                 Objects.equals(seasonType, season.seasonType);
     }
 
-    // genererer hash basert på seasonType og year.
+    /**
+     * Hash genereres fra sesongtype og år.
+     */
     @Override
     public int hashCode() {
-        return Objects.hash(seasonType, year);
+        return Objects.hash(seasonType, validYear);
     }
-
 }
