@@ -1,141 +1,112 @@
 package controllers;
 
-import domain.model.OperationMessage;
-import domain.model.Route;
-import service.OperationMessageService;
-import domain.service.RouteService;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import dto.MessageRequest;
 import dto.MessageResponse;
+import service.OperationMessageService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/messages")
 public class MessageController {
 
-    // For max lengde på tekst
-    private static final int MAX_MESSAGE_LENGTH = 500;
-
-    private final OperationMessageService messageService;
-    private final RouteService routeService;
+    private final OperationMessageService service;
 
     // Dette er konstruktøren som gjør klar service slik at controlleren kan bruke den
-    public MessageController(OperationMessageService messageService, RouteService routeService) {
-        this.messageService = messageService;
-        this.routeService = routeService;
+    public MessageController(OperationMessageService service) {
+        this.service = service;
     }
 
-    @GetMapping("/{id}")
-    public OperationMessage getMessage(@PathVariable int id) {
-        return messageService.getMessage(id);
-    }
-
-    @GetMapping
-    public List<OperationMessage> getAllMessages() {
-        return messageService.getAllMessages();
-    }
-
-    @PutMapping("/{id}")
-    public void updateMessage(@PathVariable int id, @RequestBody OperationMessage message) {
-        message.setId(id);
-        messageService.updateMessage(message);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteMessage(@PathVariable int id) {
-        messageService.removeMessage(id);
-    }
-
-    // Dette er et endepunkt som brukes for å opprette driftsmeldinger fra UI
-    // Endepunktet tar imot data fra MessageRequest, og validerer disse og lagrer meldingen i databasen
+    // Dette er endepunktet som brukes for å opprette driftsmeldinger
     @PostMapping
-    public ResponseEntity<MessageResponse> createMessage(@RequestBody MessageRequest req,
-                                                         @RequestHeader(value = "adminToken", required = false) String adminToken) {
+    public ResponseEntity<MessageResponse> createMessage(
+            @RequestBody MessageRequest req,
+            @RequestHeader(value = "adminToken", required = false) String adminToken) {
 
-        // Dette er for å sikre at kun admin kan opprette driftsmeldinger
+        // Dette er for å sikre at kun admin kan opprette meldinger
         if (adminToken == null || !adminToken.equals("test123")) {
-            System.out.println("FEIL: Ugyldig adminToken.");
             return ResponseEntity.status(401).body(MessageResponse.fail("Ikke autorisert"));
         }
 
-        // Dette sjekker om tekstfeltet er tomt
-        if (req.message == null || req.message.isBlank()) {
-            return ResponseEntity.badRequest().body(MessageResponse.fail("Tekst kan ikke være tom"));
+        // Dette er for å sende requesten videre til service som gjør validering og lagring
+        MessageResponse response = service.createMessage(req);
+
+        // Hvis service fant en feil sendes feil tilbake
+        if (!response.success) {
+            return ResponseEntity.badRequest().body(response);
         }
 
-        // Dette er for å sjekk maksimal tekstlengde
-        if (req.message.length() > MAX_MESSAGE_LENGTH) {
-            return ResponseEntity.badRequest().body(MessageResponse.fail("Tekst kan ikke være lengre enn " + MAX_MESSAGE_LENGTH + " tegn"));
-        }
-
-        // Dette sjekker at ruteId er gyldig
-        if (req.routeId <= 0) {
-            return ResponseEntity.badRequest().body(MessageResponse.fail("Ugyldig ruteId"));
-        }
-
-        // Dette er for å sjekk at ruten faktisk finnes
-        Route route = routeService.getRoute(req.routeId);
-        if (route == null) {
-            return ResponseEntity.badRequest().body(MessageResponse.fail("Rute finnes ikke"));
-        }
-
-        // Dette sjekker at startdato er satt
-        if (req.validFrom == null || req.validFrom.isBlank()) {
-            return ResponseEntity.badRequest().body(MessageResponse.fail("Startdato må være satt"));
-        }
-
-        // Validering av datoformat
-        try {
-            LocalDate.parse(req.validFrom);
-
-            if (req.validTo != null && !req.validTo.isBlank()) {
-                LocalDate.parse(req.validTo);
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(MessageResponse.fail("Dato må være på format yyyy-MM-dd"));
-        }
-
-        // Dette sjekker at sluttdato er gyldig om den finnes
-        if (req.validTo != null && !req.validTo.isBlank()) {
-            if (req.validFrom.compareTo(req.validTo) >= 0) {
-                return ResponseEntity.badRequest().body(MessageResponse.fail("Startdato må være før sluttdato"));
-            }
-        }
-
-        try {
-            // Dette lager startdato for driftsmeldingen
-            LocalDateTime from = LocalDate.parse(req.validFrom).atStartOfDay();
-
-            // Dette lager sluttdato hvis den finnes
-            LocalDateTime to = null;
-            if (req.validTo != null && !req.validTo.isBlank()) {
-                to = LocalDate.parse(req.validTo).atTime(23, 59);
-            }
-
-            // Dette er for å opprette en ny driftsmelding
-            OperationMessage msg = new OperationMessage(req.message, req.isActive, new Route(req.routeId), from, to);
-
-            // Logger hvem som lagret meldingen
-            msg.setCreatedBy(adminToken);
-
-            // Dette er for å lagre driftsmeldingen i databasen
-            messageService.addMessage(msg);
-
-            System.out.println("INFO: Driftsmelding ble opprettet.");
-
-            // Dette returnerer id til meldingen tilbake til frontend
-            return ResponseEntity.status(201).body(MessageResponse.ok(msg.getId()));
-
-        } catch (Exception e) {
-            System.out.println("FEIL: Klarte ikke å opprette driftsmelding (" + e.getMessage() + ")");
-            return ResponseEntity.status(500).body(MessageResponse.fail("Klarte ikke å opprette driftsmelding"));
-        }
+        // Vi får 201 (created) når alt gikk bra
+        return ResponseEntity.status(201).body(response);
     }
 
-}
+    // Dette henter en melding basert på id,og returnerer MessageResponse
+    @GetMapping("/{id}")
+    public ResponseEntity<MessageResponse> getMessage(@PathVariable int id) {
 
+        MessageResponse response = service.getMessageAsResponse(id);
+
+        // Er for hvis meldingen ikke finnes
+        if (!response.success && response.error != null) {
+            return ResponseEntity.status(404).body(response);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    // Dette henter alle driftsmeldinger som ferdig DTO
+    @GetMapping
+    public ResponseEntity<List<MessageResponse>> getAllMessages() {
+        List<MessageResponse> list = service.getAllMessagesAsResponse();
+        return ResponseEntity.ok(list);
+    }
+
+    // Dette oppdaterer en melding basert på id
+    @PutMapping("/{id}")
+    public ResponseEntity<MessageResponse> updateMessage(
+            @PathVariable int id,
+            @RequestBody MessageRequest req,
+            @RequestHeader(value = "adminToken", required = false) String adminToken) {
+
+        // For at kun admin skal kunne oppdatere meldinger
+        if (adminToken == null || !adminToken.equals("test123")) {
+            return ResponseEntity.status(401).body(MessageResponse.fail("Ikke autorisert"));
+        }
+
+        // Er for å sende oppdateringen videre til service
+        MessageResponse response = service.updateMessage(id, req);
+
+        // Ved feil returneres badRequest
+        if (!response.success) {
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        // Det returneres OK hvis endringen gikk bra
+        return ResponseEntity.ok(response);
+    }
+
+    // Dette sletter en melding basert på id
+    @DeleteMapping("/{id}")
+    public ResponseEntity<MessageResponse> deleteMessage(
+            @PathVariable int id,
+            @RequestHeader(value = "adminToken", required = false) String adminToken) {
+
+        // Er for at kun admin skal kunne slette meldinger
+        if (adminToken == null || !adminToken.equals("test123")) {
+            return ResponseEntity.status(401).body(MessageResponse.fail("Ikke autorisert"));
+        }
+
+        // Dette sender slettingen videre til service
+        MessageResponse response = service.deleteMessage(id);
+
+        // Det vil returnere feil hvis sletting feilet
+        if (!response.success) {
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        // Det vil returnere OK hvis sletting gikk bra
+        return ResponseEntity.ok(response);
+    }
+}
