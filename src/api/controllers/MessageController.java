@@ -109,4 +109,17 @@ public class MessageController {
         // Det vil returnere OK hvis sletting gikk bra
         return ResponseEntity.ok(response);
     }
+
+    // For å hente alle meldinger som gjelder en bestemt rute
+
+    @GetMapping("/route/{routeId}")
+    public ResponseEntity<List<MessageResponse>> getByRoute(@PathVariable int routeId) {
+
+        // Sender routeId videre til service som henter meldinger for ruten
+        List<MessageResponse> list = service.getMessagesByRoute(routeId);
+
+        // Returnerer listen som JSON
+        return ResponseEntity.ok(list);
+    }
 }
+

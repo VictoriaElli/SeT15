@@ -200,4 +200,32 @@ public class OperationMessageService {
         // Lager en ny melding vis det ikke er en oppdatering
         return new OperationMessage(req.message, req.isActive, route, from, to);
     }
+
+
+    // For også hente alle meldinger som gjelder en bestemt rute
+
+    public List<MessageResponse> getMessagesByRoute(int routeId) {
+        // Dette henter ruten basert på routeId
+        Optional<Route> routeOpt = routeRepo.readById(routeId);
+
+        // For også sjekke om ruten finnes
+        if (routeOpt.isEmpty()) {
+            List<MessageResponse> list = new ArrayList<>();
+            list.add(MessageResponse.fail("Rute finnes ikke"));
+            return list;
+        }
+
+        Route route = routeOpt.get();
+
+        // Henter alle driftsmeldinger for ruten
+        List<OperationMessage> messages = messageRepo.findByRoute(route);
+
+
+        List<MessageResponse> output = new ArrayList<>();
+        for (OperationMessage msg : messages) {
+            output.add(MessageResponse.fromMessage(msg));
+        }
+
+        return output;
+    }
 }
