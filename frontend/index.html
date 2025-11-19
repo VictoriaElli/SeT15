@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reiseplanlegger</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <img src="img/byferga-logo-hvit.png" alt="Byferge Logo" class="logo">
+  </header>
+
+  <main class="container">
+      <!-- REISEPLANLEGGER -->
+      <section id="travelPlanner">
+          <h1>Reiseplanlegger</h1>
+          <form id="travelForm">
+              <label for="fromStop">Fra:</label>
+              <select name="fromLocation" id="fromStop"></select>
+
+              <label for="toStop">Til:</label>
+              <select id="toStop" name="toLocation"></select>
+
+              <label for="date">Dato</label>
+              <input id="date" type="date" required>
+
+              <label for="time">Tid</label>
+              <input id="time" type="time" required>
+
+              <div class="timeModeContainer">
+                  <!-- NÅ -->
+                  <input type="radio" id="now" name="timeMode" value="NOW" checked>
+                  <label for="now" class="time-btn">NÅ</label>
+
+                  <!-- Avreise / Ankomst toggle -->
+                  <div class="toggle-btn-group">
+                      <input type="radio" id="depart" name="timeMode" value="DEPART">
+                      <input type="radio" id="arrival" name="timeMode" value="ARRIVAL">
+
+                      <label for="depart">Avreise</label>
+                      <label for="arrival">Ankomst</label>
+
+                      <div class="toggle-indicator"></div> <!-- indikator til slutt -->
+                  </div>
+              </div>
+
+              <button type="submit" id="submitBtn">Planlegg reise</button>
+          </form>
+      </section>
+
+      <!-- RESULTATER -->
+      <section id="resultsSection" class="hidden">
+          <h2>Avganger</h2>
+          <button id="backToSearchBtn" class="backBtn">Tilbake til søk</button>
+          <div id="results"></div>
+      </section>
+
+      <!-- DETALJER -->
+      <section id="routeDetails" class="hidden">
+          <button id="backToResultsBtn" class="backBtn">Tilbake til avganger</button>
+          <div id="detailsContent"></div>
+      </section>
+  </main>
+
+  <footer>
+    <div class="footer-icons">
+      <a href="index.html" class="nav-link" aria-label="Reiseplanlegger">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-ship-icon lucide-ship">
+          <path d="M12 10.189V14"/>
+          <path d="M12 2v3"/>
+          <path d="M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6"/>
+          <path d="M19.38 20A11.6 11.6 0 0 0 21 14l-8.188-3.639a2 2 0 0 0-1.624 0L3 14a11.6 11.6 0 0 0 2.81 7.76"/>
+          <path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1s1.2 1 2.5 1c2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+        </svg>
+      </a>
+      <a href="#" class="nav-link" aria-label="Tidstabell">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-clock3-icon lucide-clock-3">
+          <path d="M12 6v6h4"/>
+          <circle cx="12" cy="12" r="10"/>
+        </svg>
+      </a>
+      <a href="#" class="nav-link" aria-label="Profil">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-icon lucide-user">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </a>
+    </div>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
