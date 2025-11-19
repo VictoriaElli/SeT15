@@ -21,6 +21,9 @@ public class DepartureDTO {
     private boolean isOmitted;
     private int delayMinutes;
     private String operationMessage;
+    private EnvironmentDTO environmentSavings;
+
+
 
     // --- Konstruktør ---
     public DepartureDTO(int routeId, int fromStopId, String fromStopName,
@@ -60,6 +63,10 @@ public class DepartureDTO {
     public boolean isOmitted() { return isOmitted; }
     public int getDelayMinutes() { return delayMinutes; }
     public String getOperationMessage() { return operationMessage; }
+
+    public EnvironmentDTO getEnvironmentSavings() {
+        return environmentSavings;
+    }
 
     // --- Settere ---
     public void setRouteId(int routeId) {
@@ -120,5 +127,9 @@ public class DepartureDTO {
 
     public void setOperationMessage(String operationMessage) {
         this.operationMessage = operationMessage;
+    }
+
+    public void setEnvironmentSavings(EnvironmentDTO environmentSavings) {
+        this.environmentSavings = environmentSavings;
     }
 }
