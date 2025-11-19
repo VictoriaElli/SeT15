@@ -9,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/departures")
+@CrossOrigin(origins = "*")
 public class DepartureController {
 
     private final ScheduleService scheduleService;
