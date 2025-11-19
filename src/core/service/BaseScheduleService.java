@@ -29,6 +29,7 @@ public abstract class BaseScheduleService {
         this.exceptionRepo = exceptionRepo;
     }
 
+
     // --- Bygger ruteplan for en gitt dato ---
     protected void buildSchedule(LocalDate referenceDate) {
         allRoutes = routeRepo.readAll();
@@ -236,4 +237,5 @@ public abstract class BaseScheduleService {
         dto.setRouteNumber(route.getRouteNum());
         return dto;
     }
+
 }
