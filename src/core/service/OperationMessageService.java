@@ -31,7 +31,7 @@ public class OperationMessageService {
     }
 
     // Dette oppretter en ny driftsmelding
-    public MessageResponse createMessage(MessageRequest req) {
+    public MessageResponse createFullMessage(MessageRequest req) {
         try {
             // Bygger og validerer meldingen før lagring
             OperationMessage msg = buildAndValidateMessage(req, null);
@@ -39,8 +39,13 @@ public class OperationMessageService {
             // Lagrer meldingen i databasen
             messageRepo.create(msg);
 
-            // For å få id for en ny melding
-            return MessageResponse.ok(msg.getId());
+            // Er for å bygge en full MessageResponse
+            MessageResponse full = MessageResponse.fromMessage(msg);
+
+            // For å sette status til CREATED fordi det er POST
+            full.status = "CREATED";
+
+            return full;
 
         } catch (IllegalArgumentException e) {
             // Dette skjer når en feil som oppstår ved validering

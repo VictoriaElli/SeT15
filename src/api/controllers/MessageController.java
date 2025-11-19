@@ -31,7 +31,7 @@ public class MessageController {
         }
 
         // Dette er for å sende requesten videre til service som gjør validering og lagring
-        MessageResponse response = service.createMessage(req);
+        MessageResponse response = service.createFullMessage(req);
 
         // Hvis service fant en feil sendes feil tilbake
         if (!response.success) {
