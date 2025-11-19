@@ -135,7 +135,7 @@ public abstract class BaseScheduleService {
 
                     boolean timeSkip = switch (timeMode) {
                         case DEPART -> plannedDeparture.isBefore(travelTime);
-                        case ARRIVAL -> arrivalTime.isBefore(travelTime);
+                        case ARRIVAL -> arrivalTime.isAfter(travelTime);
                         case NOW -> plannedDeparture.isBefore(travelTime);
                     };
                     if (timeSkip) continue;
@@ -181,7 +181,7 @@ public abstract class BaseScheduleService {
 
         // Sorter korrekt
         if (timeMode == TimeMode.ARRIVAL) {
-            departures.sort(Comparator.comparing(DepartureDTO::getArrivalTime));
+            departures.sort(Comparator.comparing(DepartureDTO::getArrivalTime).reversed());
         } else {
             departures.sort(Comparator.comparing(DepartureDTO::getPlannedDeparture));
         }

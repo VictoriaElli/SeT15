@@ -5,10 +5,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan({"controllers", "service", "port", "adapter", "database"})
-public class FerryApiApplication {
+@ComponentScan({"controllers", "service", "port", "adapter", "database", "config"})
+public class SpringBoot {
     public static void main(String[] args) {
-        SpringApplication.run(FerryApiApplication.class, args);
+        SpringApplication.run(SpringBoot.class, args);
     }
 }
 
