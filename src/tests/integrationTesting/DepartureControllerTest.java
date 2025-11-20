@@ -4,11 +4,8 @@ import controllers.DepartureController;
 import dto.DepartureRequestDTO;
 import dto.DepartureResponseDTO;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -44,8 +41,8 @@ class DepartureControllerTest {
         // Mock respons fra ScheduleService
         DepartureResponseDTO mockResponse = new DepartureResponseDTO();
         mockResponse.setRouteNumber(1);
-        mockResponse.setFromStopName("A");
-        mockResponse.setToStopName("B");
+        mockResponse.setFromStopName("Gamlebyen");
+        mockResponse.setToStopName("Ålekilen");
         mockResponse.setTravelDate(LocalDate.of(2025, 11, 19));
         mockResponse.setPlannedDeparture(LocalTime.of(10, 0));
         mockResponse.setArrivalTime(LocalTime.of(10, 30));
@@ -55,19 +52,19 @@ class DepartureControllerTest {
 
         // Bygg request
         DepartureRequestDTO requestDTO = new DepartureRequestDTO(
-                "A", "B",
+                "Gamlebyen", "Ålekilen",
                 LocalDate.of(2025, 11, 19),
                 LocalTime.of(10, 0),
                 null
         );
 
-        mockMvc.perform(post("/api/departures")
+        mockMvc.perform(post("/api/departures/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].routeNumber").value(1))
-                .andExpect(jsonPath("$[0].fromStopName").value("A"))
-                .andExpect(jsonPath("$[0].toStopName").value("B"))
+                .andExpect(jsonPath("$[0].fromStopName").value("Gamlebyen"))
+                .andExpect(jsonPath("$[0].toStopName").value("Ålekilen"))
                 .andExpect(jsonPath("$[0].plannedDeparture").value("10:00:00"))
                 .andExpect(jsonPath("$[0].arrivalTime").value("10:30:00"));
     }
@@ -78,13 +75,13 @@ class DepartureControllerTest {
                 .thenReturn(List.of());
 
         DepartureRequestDTO requestDTO = new DepartureRequestDTO(
-                "X", "Y",
+                "Lisleby", "Sellebakk",
                 LocalDate.of(2025, 11, 19),
                 LocalTime.of(10, 0),
                 null
         );
 
-        mockMvc.perform(post("/api/departures")
+        mockMvc.perform(post("/api/departures/search")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isOk())

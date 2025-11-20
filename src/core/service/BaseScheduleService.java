@@ -134,12 +134,18 @@ public abstract class BaseScheduleService {
                                     && (ex.isCancelled() || ex.isOmitted()));
                     if (skip) continue;
 
-                    boolean timeSkip = switch (timeMode) {
-                        case DEPART -> plannedDeparture.isBefore(travelTime);
-                        case ARRIVAL -> arrivalTime.isAfter(travelTime);
-                        case NOW -> plannedDeparture.isBefore(travelTime);
-                    };
-                    if (timeSkip) continue;
+                    boolean timeSkip = false;
+
+                    if (travelTime != null) { // bare sjekk hvis travelTime er satt
+                        timeSkip = switch (timeMode) {
+                            case DEPART -> plannedDeparture.isBefore(travelTime);
+                            case ARRIVAL -> arrivalTime.isAfter(travelTime);
+                            case NOW -> plannedDeparture.isBefore(travelTime);
+                        };
+                    }
+
+                    if (timeSkip) continue; // hopp over denne avgangen hvis den ikke passer
+
 
                     String operationMessage = activeExceptions.stream()
                             .filter(ex -> ex.getDepartureTime().equals(firstStopDeparture))
@@ -166,12 +172,17 @@ public abstract class BaseScheduleService {
 
                 if (addedDepartures.contains(plannedDeparture)) continue;
 
-                boolean timeSkip = switch (timeMode) {
-                    case DEPART -> plannedDeparture.isBefore(travelTime);
-                    case ARRIVAL -> arrivalTime.isBefore(travelTime);
-                    case NOW -> plannedDeparture.isBefore(travelTime);
-                };
-                if (timeSkip) continue;
+                boolean timeSkip = false;
+
+                if (travelTime != null) { // bare sjekk hvis travelTime er satt
+                    timeSkip = switch (timeMode) {
+                        case DEPART -> plannedDeparture.isBefore(travelTime);
+                        case ARRIVAL -> arrivalTime.isAfter(travelTime);
+                        case NOW -> plannedDeparture.isBefore(travelTime);
+                    };
+                }
+
+                if (timeSkip) continue; // hopp over denne avgangen hvis den ikke passer
 
                 departures.add(createDepartureDTO(currentRoute, fromStop, toStop,
                         travelDate, plannedDeparture, arrivalTime, true,

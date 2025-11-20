@@ -30,7 +30,7 @@ class DepartureAcceptanceTest {
                 LocalTime.of(10,0), null);
 
         DepartureResponseDTO[] response = restTemplate.postForObject(
-                "http://localhost:" + port + "/api/departures",
+                "http://localhost:" + port + "/api/departures/search",
                 request,
                 DepartureResponseDTO[].class
         );

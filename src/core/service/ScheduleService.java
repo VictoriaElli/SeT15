@@ -4,14 +4,14 @@ import domain.model.*;
 import dto.DepartureDTO;
 import dto.DepartureRequestDTO;
 import dto.DepartureResponseDTO;
+import dto.ScheduleDTO;
 import org.springframework.stereotype.Service;
 import port.outbound.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ScheduleService extends BaseScheduleService {
@@ -70,4 +70,56 @@ public class ScheduleService extends BaseScheduleService {
         }
         return response;
     }
+
+    public List<ScheduleDTO> getFullSchedule(LocalDate date) {
+
+        buildSchedule(date);
+
+        Map<String, ScheduleDTO> scheduleMap = new HashMap<>();
+
+        for (Route route : allRoutes) {
+
+            Stops fromStop = route.getFromStop();
+            Stops toStop = route.getToStop();
+
+            if (fromStop == null || toStop == null) continue;
+
+            // Hent alle avganger fra ruten, men kun fra første stopp
+            List<DepartureDTO> departures = findDepartures(fromStop, toStop, date, null, TimeMode.DEPART)
+                    .stream()
+                    .filter(dep -> dep.getFromStopName() != null && dep.getFromStopName().equals(fromStop.getName()))
+                    .collect(Collectors.toList());
+
+            if (departures.isEmpty()) continue;
+
+            // Lag nøkkel per rute/retning
+            String key = route.getRouteNum() + "_" + fromStop.getName() + "_" + toStop.getName();
+
+            ScheduleDTO dto = scheduleMap.get(key);
+            if (dto == null) {
+                dto = new ScheduleDTO(
+                        route.getRouteNum(),
+                        fromStop.getName(),
+                        toStop.getName(),
+                        new ArrayList<>()
+                );
+                scheduleMap.put(key, dto);
+            }
+
+            // Kun legg til avgangstider
+            for (DepartureDTO dep : departures) {
+                dto.getPlannedDepartures().add(dep.getPlannedDeparture()); // starttid
+            }
+
+            dto.getPlannedDepartures().sort(Comparator.naturalOrder());
+        }
+
+        List<ScheduleDTO> list = new ArrayList<>(scheduleMap.values());
+
+        // Sorter på rutenummer stigende
+        list.sort(Comparator.comparingInt(ScheduleDTO::getRouteNumber).reversed());
+
+        return list;
+    }
+
 }
