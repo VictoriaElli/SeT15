@@ -21,14 +21,20 @@ public class EnvironmentService {
     public EnvironmentDTO calculateSavings(int fromStopId, int toStopId) {
         DistanceBetweenStops route = stopDistanceRepository.findByFromAndTo(fromStopId, toStopId);
 
+
         if (route == null) {
             throw new RuntimeException("Route not found: " + fromStopId + " -> " + toStopId);
         }
+        DistanceBetweenStops calculationRoute = new DistanceBetweenStops(route.getFromStop(),route.getToStop(), route.getDistance(), route.isTollgate());
 
-        double tollSaved = route.isTollgate() ? EnvironmentVariables.averageCostThruTollgate : 0;
-        double distanceSaved = route.getDistance() * EnvironmentVariables.standardRatePrKm;
-        double totalCostSaved = Math.round(tollSaved + distanceSaved - EnvironmentVariables.ferryRate);
-        double emissionSaved = Math.round(route.getDistance() * EnvironmentVariables.averageEmissionPrKm);
+        double tollSaved = calculationRoute.tollgateCostSaved();
+                // route.isTollgate() ? EnvironmentVariables.averageCostThruTollgate : 0;
+        double distanceSaved = calculationRoute.distanceCostSaved();
+                // route.getDistance() * EnvironmentVariables.standardRatePrKm;
+        double totalCostSaved = calculationRoute.getCostSaved();
+                // Math.round(tollSaved + distanceSaved - EnvironmentVariables.ferryRate);
+        double emissionSaved = calculationRoute.emissionSaved();
+                // Math.round(route.getDistance() * EnvironmentVariables.averageEmissionPrKm);
 
         return new EnvironmentDTO(totalCostSaved, emissionSaved);
     }

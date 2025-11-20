@@ -71,7 +71,7 @@ select {
    Seksjoner
 ========================== */
 
-#travelPlanner, #routeDetails, #resultsSection {
+#travelPlanner, #routeDetails, #resultsSection, #scheduleSection {
   flex: 1 0 auto;
   width: 100%;
   max-width: 480px;
@@ -394,6 +394,112 @@ input#now:checked + .time-btn {
 .backBtn:hover {
   background-color: #0056b3;
 }
+
+/* ==========================
+   Tidstabell
+========================== */
+.route-card {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    min-width: 75%;
+    max-width: 100%;
+    min-height: 360px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Header med rutenummer over rutenavn */
+.route-header {
+    display: flex;
+    flex-direction: column;  /* rutenummer øverst */
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 4px;
+}
+
+.route-header .route-number {
+    font-weight: bold;
+    font-size: 2.5rem;
+}
+
+.route-header .route-name {
+    font-size: 2rem;
+    text-align: center;
+}
+
+/* Stopp-linje - alle stopp på samme rad */
+.route-card .stops {
+    display: flex;
+    gap: 10px;
+    white-space: nowrap;
+    overflow-x: auto;
+    font-weight: 500;
+    font-size: 3rem;
+    padding-top: 5px;
+}
+
+/* Avgangstider med scrollbar */
+.route-times {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-y: auto;
+    max-height: 250px;
+    padding-right: 4px;
+    align-items: center;
+}
+
+.route-times span {
+    padding: 6px 10px;
+    background-color: #e0f0ff;
+    border-radius: 15px;
+    font-size: 1.5rem;
+    min-width: 75%;
+    text-align: center;
+}
+
+/* Carousel-knapper over kortene */
+.route-card {
+  position: relative; /* nødvendig for absolute knappplassering */
+  overflow: visible;  /* så knappene ikke klippes */
+}
+
+.route-card .carousel-btn {
+  position: absolute;
+  top: 5%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 123, 255, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.route-card .carousel-btn.prev {
+  left: 40px;
+}
+
+.route-card .carousel-btn.next {
+  right: 40px;
+}
+
+.route-card .carousel-btn svg {
+  font-size: 1rem;
+  color: white;
+}
+
 
 
 /* ==========================

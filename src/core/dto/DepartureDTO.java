@@ -47,6 +47,10 @@ public class DepartureDTO {
         this.operationMessage = operationMessage;
     }
 
+    public DepartureDTO() {
+        // tom konstruktør for testing
+    }
+
     // --- Gettere ---
     public int getRouteId() { return routeId; }
     public int getRouteNumber() { return routeNumber; }
