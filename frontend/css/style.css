@@ -558,6 +558,17 @@ footer {
   box-shadow: 0 0 0 3px rgba(255,255,255,0.12);
 }
 
+
+.footer-indicator {
+  position: absolute;
+  bottom: 4px;
+  height: 3px;
+  background-color: #fff;
+  border-radius: 2px;
+  transition: left 0.3s ease, width 0.3s ease;
+  pointer-events: none;
+}
+
 /* ==========================
    Misc
 ========================== */
