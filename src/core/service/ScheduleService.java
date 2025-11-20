@@ -72,19 +72,18 @@ public class ScheduleService extends BaseScheduleService {
     }
 
     public List<ScheduleDTO> getFullSchedule(LocalDate date) {
-
+        // Bygg planen for dagen
         buildSchedule(date);
 
         Map<String, ScheduleDTO> scheduleMap = new HashMap<>();
 
         for (Route route : allRoutes) {
-
             Stops fromStop = route.getFromStop();
             Stops toStop = route.getToStop();
 
             if (fromStop == null || toStop == null) continue;
 
-            // Hent alle avganger fra ruten, men kun fra første stopp
+            // Hent alle avganger fra ruten, kun fra første stopp
             List<DepartureDTO> departures = findDepartures(fromStop, toStop, date, null, TimeMode.DEPART)
                     .stream()
                     .filter(dep -> dep.getFromStopName() != null && dep.getFromStopName().equals(fromStop.getName()))
@@ -106,20 +105,21 @@ public class ScheduleService extends BaseScheduleService {
                 scheduleMap.put(key, dto);
             }
 
-            // Kun legg til avgangstider
+            // Legg til kun avgangstidene fra første stopp
             for (DepartureDTO dep : departures) {
-                dto.getPlannedDepartures().add(dep.getPlannedDeparture()); // starttid
+                dto.getPlannedDepartures().add(dep.getPlannedDeparture());
             }
 
+            // Sorter stigende
             dto.getPlannedDepartures().sort(Comparator.naturalOrder());
         }
 
         List<ScheduleDTO> list = new ArrayList<>(scheduleMap.values());
 
-        // Sorter på rutenummer stigende
         list.sort(Comparator.comparingInt(ScheduleDTO::getRouteNumber).reversed());
 
         return list;
     }
+
 
 }
