@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFormSubmit();
   setupBackToResults();
   setupTimeModeToggle();
+  setActiveFooterLink();
 });
 
 // Sett dagens dato som standard
