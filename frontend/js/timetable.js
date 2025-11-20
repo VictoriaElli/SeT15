@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   loadFullSchedule();
+  setActiveFooterLink();
 });
 
 async function loadFullSchedule() {

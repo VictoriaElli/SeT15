@@ -22,6 +22,6 @@ public class ScheduleServiceWithoutDTO extends BaseScheduleService {
     public List<DepartureDTO> getDepartures(Stops fromStop, Stops toStop,
                                             LocalDate travelDate, LocalTime travelTime,
                                             TimeMode timeMode) {
-        return findDepartures(fromStop, toStop, travelDate, travelTime, timeMode);
+        return findDepartures(fromStop, toStop, travelDate, travelTime);
     }
 }
