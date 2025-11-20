@@ -26,7 +26,7 @@ public class OperationMessageRepositoryMYSQLAdapter implements OperationMessageR
     // --- CRUD METHODS ---
     @Override
     public void create(OperationMessage msg) {
-        String sql = "INSERT INTO operation_message (message, published, isActive, routeId, validFrom, validTo) " +
+        String sql = "INSERT INTO operationMessage (message, published, isActive, routeId, validFrom, validTo) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -48,7 +48,7 @@ public class OperationMessageRepositoryMYSQLAdapter implements OperationMessageR
 
     @Override
     public Optional<OperationMessage> readById(int id) {
-        String sql = "SELECT * FROM operation_message WHERE id=?";
+        String sql = "SELECT * FROM operationMessage WHERE id=?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -63,13 +63,13 @@ public class OperationMessageRepositoryMYSQLAdapter implements OperationMessageR
 
     @Override
     public List<OperationMessage> readAll() {
-        String sql = "SELECT * FROM operation_message ORDER BY published DESC";
+        String sql = "SELECT * FROM operationMessage ORDER BY published DESC";
         return executeQueryList(sql, null);
     }
 
     @Override
     public void update(OperationMessage msg) {
-        String sql = "UPDATE operation_message SET message=?, isActive=?, routeId=?, validFrom=?, validTo=? WHERE id=?";
+        String sql = "UPDATE operationMessage SET message=?, isActive=?, routeId=?, validFrom=?, validTo=? WHERE id=?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -93,7 +93,7 @@ public class OperationMessageRepositoryMYSQLAdapter implements OperationMessageR
 
     @Override
     public void deleteById(int id) {
-        String sql = "DELETE FROM operation_message WHERE id=?";
+        String sql = "DELETE FROM operationMessage WHERE id=?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -107,19 +107,19 @@ public class OperationMessageRepositoryMYSQLAdapter implements OperationMessageR
     // --- Spørringer ---
     @Override
     public List<OperationMessage> findByRoute(Route route) {
-        String sql = "SELECT * FROM operation_message WHERE routeId=? ORDER BY published DESC";
+        String sql = "SELECT * FROM operationMessage WHERE routeId=? ORDER BY published DESC";
         return executeQueryList(sql, stmt -> stmt.setInt(1, route.getId()));
     }
 
     @Override
     public List<OperationMessage> findActiveByRoute(Route route) {
-        String sql = "SELECT * FROM operation_message WHERE routeId=? AND isActive=TRUE ORDER BY published DESC";
+        String sql = "SELECT * FROM operationMessage WHERE routeId=? AND isActive=TRUE ORDER BY published DESC";
         return executeQueryList(sql, stmt -> stmt.setInt(1, route.getId()));
     }
 
     @Override
     public List<OperationMessage> findByRouteAndTime(Route route, LocalDateTime time) {
-        String sql = "SELECT * FROM operation_message WHERE routeId=? AND validFrom<=? AND validTo>=? ORDER BY published DESC";
+        String sql = "SELECT * FROM operationMessage WHERE routeId=? AND validFrom<=? AND validTo>=? ORDER BY published DESC";
         return executeQueryList(sql, stmt -> {
             stmt.setInt(1, route.getId());
             stmt.setTimestamp(2, Timestamp.valueOf(time));
@@ -129,13 +129,13 @@ public class OperationMessageRepositoryMYSQLAdapter implements OperationMessageR
 
     @Override
     public List<OperationMessage> findActiveNow() {
-        String sql = "SELECT * FROM operation_message WHERE isActive=TRUE AND validFrom<=NOW() AND validTo>=NOW() ORDER BY published DESC";
+        String sql = "SELECT * FROM operationMessage WHERE isActive=TRUE AND validFrom<=NOW() AND validTo>=NOW() ORDER BY published DESC";
         return executeQueryList(sql, null);
     }
 
     @Override
     public List<OperationMessage> findByRouteAndInterval(Route route, LocalDateTime from, LocalDateTime to) {
-        String sql = "SELECT * FROM operation_message WHERE routeId=? AND validFrom<=? AND validTo>=? ORDER BY published DESC";
+        String sql = "SELECT * FROM operationMessage WHERE routeId=? AND validFrom<=? AND validTo>=? ORDER BY published DESC";
         return executeQueryList(sql, stmt -> {
             stmt.setInt(1, route.getId());
             stmt.setTimestamp(2, Timestamp.valueOf(to));
@@ -145,7 +145,7 @@ public class OperationMessageRepositoryMYSQLAdapter implements OperationMessageR
 
     @Override
     public void setActiveStatus(int id, boolean active) {
-        String sql = "UPDATE operation_message SET isActive=? WHERE id=?";
+        String sql = "UPDATE operationMessage SET isActive=? WHERE id=?";
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 

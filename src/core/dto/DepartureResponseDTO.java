@@ -40,6 +40,21 @@ public class DepartureResponseDTO {
         }
     }
 
+    public static DepartureResponseDTO fromDepartureDTO(DepartureDTO dto) {
+        DepartureResponseDTO resp = new DepartureResponseDTO();
+        resp.setRouteNumber(dto.getRouteNumber());
+        resp.setFromStopName(dto.getFromStopName());
+        resp.setToStopName(dto.getToStopName());
+        resp.setTravelDate(dto.getTravelDate());
+        resp.setPlannedDeparture(dto.getPlannedDeparture());
+        resp.setArrivalTime(dto.getArrivalTime());
+        resp.setDelayMinutes(dto.getDelayMinutes());
+        resp.setOperationMessage(dto.getOperationMessage());
+        return resp;
+    }
+
+
+
     // --- Gettere ---
     public int getRouteNumber() {return routeNumber;}
     public String getFromStopName() { return fromStopName; }
