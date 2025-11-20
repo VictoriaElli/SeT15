@@ -31,7 +31,7 @@ public class OperationMessageService {
     }
 
     // Dette oppretter en ny driftsmelding
-    public MessageResponse createMessage(MessageRequest req) {
+    public MessageResponse createFullMessage(MessageRequest req) {
         try {
             // Bygger og validerer meldingen før lagring
             OperationMessage msg = buildAndValidateMessage(req, null);
@@ -39,8 +39,13 @@ public class OperationMessageService {
             // Lagrer meldingen i databasen
             messageRepo.create(msg);
 
-            // For å få id for en ny melding
-            return MessageResponse.ok(msg.getId());
+            // Er for å bygge en full MessageResponse
+            MessageResponse full = MessageResponse.fromMessage(msg);
+
+            // For å sette status til CREATED fordi det er POST
+            full.status = "CREATED";
+
+            return full;
 
         } catch (IllegalArgumentException e) {
             // Dette skjer når en feil som oppstår ved validering
@@ -194,5 +199,33 @@ public class OperationMessageService {
 
         // Lager en ny melding vis det ikke er en oppdatering
         return new OperationMessage(req.message, req.isActive, route, from, to);
+    }
+
+
+    // For også hente alle meldinger som gjelder en bestemt rute
+
+    public List<MessageResponse> getMessagesByRoute(int routeId) {
+        // Dette henter ruten basert på routeId
+        Optional<Route> routeOpt = routeRepo.readById(routeId);
+
+        // For også sjekke om ruten finnes
+        if (routeOpt.isEmpty()) {
+            List<MessageResponse> list = new ArrayList<>();
+            list.add(MessageResponse.fail("Rute finnes ikke"));
+            return list;
+        }
+
+        Route route = routeOpt.get();
+
+        // Henter alle driftsmeldinger for ruten
+        List<OperationMessage> messages = messageRepo.findByRoute(route);
+
+
+        List<MessageResponse> output = new ArrayList<>();
+        for (OperationMessage msg : messages) {
+            output.add(MessageResponse.fromMessage(msg));
+        }
+
+        return output;
     }
 }

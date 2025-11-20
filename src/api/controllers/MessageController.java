@@ -31,7 +31,7 @@ public class MessageController {
         }
 
         // Dette er for å sende requesten videre til service som gjør validering og lagring
-        MessageResponse response = service.createMessage(req);
+        MessageResponse response = service.createFullMessage(req);
 
         // Hvis service fant en feil sendes feil tilbake
         if (!response.success) {
@@ -109,4 +109,17 @@ public class MessageController {
         // Det vil returnere OK hvis sletting gikk bra
         return ResponseEntity.ok(response);
     }
+
+    // For å hente alle meldinger som gjelder en bestemt rute
+
+    @GetMapping("/route/{routeId}")
+    public ResponseEntity<List<MessageResponse>> getByRoute(@PathVariable int routeId) {
+
+        // Sender routeId videre til service som henter meldinger for ruten
+        List<MessageResponse> list = service.getMessagesByRoute(routeId);
+
+        // Returnerer listen som JSON
+        return ResponseEntity.ok(list);
+    }
 }
+
