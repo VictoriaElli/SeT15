@@ -12,7 +12,7 @@ import service.EnvironmentService;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class EnvironmentServiceTest {
+class EnvironmentServiceUnitTests {
 
     private StopDistanceRepositoryPort stopDistanceRepository;
     private EnvironmentService environmentService;

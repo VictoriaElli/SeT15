@@ -48,7 +48,7 @@ public class DepartureDTO {
     }
 
     public DepartureDTO() {
-        // tom konstruktør for testing
+
     }
 
     // --- Gettere ---

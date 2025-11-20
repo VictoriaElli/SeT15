@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
 
-public class DistanceBetweenStopsTests {
+public class DistanceBetweenStopsUnitTests {
 
 
     // Test for å sjekke metoden tollgateCostSaved
