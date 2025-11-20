@@ -57,6 +57,16 @@ public class Frequency {
         setIntervalMinutes(intervalMinutes);
     }
 
+    public Frequency(Route route, Weekday weekday, Season season, LocalTime firstDeparture, LocalTime lastDeparture, int intervalMinutes)
+    {
+        this.route = route;
+        this.weekday = weekday;
+        this.season = season;
+        this.firstDeparture = firstDeparture;
+        this.lastDeparture = lastDeparture;
+        setIntervalMinutes(intervalMinutes);
+    }
+
 
     // --- Metoder ---
 
