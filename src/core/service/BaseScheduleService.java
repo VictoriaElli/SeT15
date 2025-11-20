@@ -7,6 +7,7 @@ import port.outbound.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public abstract class BaseScheduleService {
@@ -16,7 +17,7 @@ public abstract class BaseScheduleService {
     protected final FrequencyRepositoryPort frequencyRepo;
     protected final ExceptionEntryRepositoryPort exceptionRepo;
 
-    protected List<Route> allRoutes = new ArrayList<>();
+    public List<Route> allRoutes = new ArrayList<>();
     protected Map<Integer, List<Frequency>> scheduleMap = new HashMap<>();
 
     protected BaseScheduleService(RouteRepositoryPort routeRepo,
@@ -79,17 +80,11 @@ public abstract class BaseScheduleService {
 
     // --- Hent avganger ---
     protected List<DepartureDTO> findDepartures(Stops fromStop, Stops toStop,
-                                                LocalDate travelDate, LocalTime travelTime,
-                                                TimeMode timeMode) {
+                                                LocalDate travelDate, LocalTime travelTime) {
         if (fromStop == null || toStop == null) return Collections.emptyList();
 
         // Bygg planen for dagen
         buildSchedule(travelDate);
-
-        if (timeMode == TimeMode.NOW) {
-            travelDate = LocalDate.now();
-            travelTime = LocalTime.now();
-        }
 
         Weekday weekday = Weekday.fromLocalDate(travelDate);
         List<DepartureDTO> departures = new ArrayList<>();
@@ -109,12 +104,12 @@ public abstract class BaseScheduleService {
                     .filter(ex -> ex.getRoute() != null
                             && ex.getRoute().getId() == currentRoute.getId()
                             && isExceptionActiveForDateAndSeason(ex, dateForLambda))
-                    .toList());
+                    .collect(Collectors.toList()));
             activeExceptions.addAll(exceptionRepo.findActiveForStopAndWeekday(fromStop, weekday).stream()
                     .filter(ex -> ex.getRoute() != null
                             && ex.getRoute().getId() == currentRoute.getId()
                             && isExceptionActiveForDateAndSeason(ex, dateForLambda))
-                    .toList());
+                    .collect(Collectors.toList()));
 
             Set<LocalTime> addedDepartures = new HashSet<>();
 
@@ -133,18 +128,6 @@ public abstract class BaseScheduleService {
                                     && ex.getDepartureTime().equals(firstStopDeparture)
                                     && (ex.isCancelled() || ex.isOmitted()));
                     if (skip) continue;
-
-                    boolean timeSkip = false;
-
-                    if (travelTime != null) { // bare sjekk hvis travelTime er satt
-                        timeSkip = switch (timeMode) {
-                            case DEPART -> plannedDeparture.isBefore(travelTime);
-                            case ARRIVAL -> arrivalTime.isAfter(travelTime);
-                            case NOW -> plannedDeparture.isBefore(travelTime);
-                        };
-                    }
-
-                    if (timeSkip) continue; // hopp over denne avgangen hvis den ikke passer
 
 
                     String operationMessage = activeExceptions.stream()
@@ -172,18 +155,6 @@ public abstract class BaseScheduleService {
 
                 if (addedDepartures.contains(plannedDeparture)) continue;
 
-                boolean timeSkip = false;
-
-                if (travelTime != null) { // bare sjekk hvis travelTime er satt
-                    timeSkip = switch (timeMode) {
-                        case DEPART -> plannedDeparture.isBefore(travelTime);
-                        case ARRIVAL -> arrivalTime.isAfter(travelTime);
-                        case NOW -> plannedDeparture.isBefore(travelTime);
-                    };
-                }
-
-                if (timeSkip) continue; // hopp over denne avgangen hvis den ikke passer
-
                 departures.add(createDepartureDTO(currentRoute, fromStop, toStop,
                         travelDate, plannedDeparture, arrivalTime, true,
                         ex.getOperationMessage() != null ? ex.getOperationMessage().getMessage() : null));
@@ -191,12 +162,7 @@ public abstract class BaseScheduleService {
             }
         }
 
-        // Sorter korrekt
-        if (timeMode == TimeMode.ARRIVAL) {
-            departures.sort(Comparator.comparing(DepartureDTO::getArrivalTime).reversed());
-        } else {
-            departures.sort(Comparator.comparing(DepartureDTO::getPlannedDeparture));
-        }
+        departures.sort(Comparator.comparing(DepartureDTO::getPlannedDeparture));
 
         return departures;
     }

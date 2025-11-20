@@ -1,6 +1,5 @@
 package integrationTesting;
 
-import controllers.DepartureController;
 import dto.DepartureRequestDTO;
 import dto.DepartureResponseDTO;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(classes = app.SpringBoot.class)
 @AutoConfigureMockMvc
-class DepartureControllerTest {
+class DepartureControllerIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;
