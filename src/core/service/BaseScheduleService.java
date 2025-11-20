@@ -7,6 +7,7 @@ import port.outbound.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 public abstract class BaseScheduleService {
@@ -16,7 +17,7 @@ public abstract class BaseScheduleService {
     protected final FrequencyRepositoryPort frequencyRepo;
     protected final ExceptionEntryRepositoryPort exceptionRepo;
 
-    protected List<Route> allRoutes = new ArrayList<>();
+    public List<Route> allRoutes = new ArrayList<>();
     protected Map<Integer, List<Frequency>> scheduleMap = new HashMap<>();
 
     protected BaseScheduleService(RouteRepositoryPort routeRepo,
@@ -103,12 +104,12 @@ public abstract class BaseScheduleService {
                     .filter(ex -> ex.getRoute() != null
                             && ex.getRoute().getId() == currentRoute.getId()
                             && isExceptionActiveForDateAndSeason(ex, dateForLambda))
-                    .toList());
+                    .collect(Collectors.toList()));
             activeExceptions.addAll(exceptionRepo.findActiveForStopAndWeekday(fromStop, weekday).stream()
                     .filter(ex -> ex.getRoute() != null
                             && ex.getRoute().getId() == currentRoute.getId()
                             && isExceptionActiveForDateAndSeason(ex, dateForLambda))
-                    .toList());
+                    .collect(Collectors.toList()));
 
             Set<LocalTime> addedDepartures = new HashSet<>();
 
